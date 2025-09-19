@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste Chart.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 400px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Ranking de Vendas por Unidade</h2>
+  <div class="chart-container">
+    <canvas id="salesByUnitChart"></canvas>
+  </div>
+
+  <script>
+    async function fetchAndRenderCharts() {
+      try {
+        const response = await fetch("http://localhost:8000/api/vendas-por-unidade");
+        const data = await response.json();
+
+        console.log("Dados recebidos:", data); // 👀 log pra confirmar
+
+        if (!data || data.length === 0) {
+          alert("Nenhum dado encontrado!");
+          return;
+        }
+
+        // Converte os dados
+        const labels = data.map(item => item.NOME);
+        const sales = data.map(item => Number(item.totalVendas));
+
+        const colors = labels.map(() => {
+          const r = Math.floor(Math.random() * 255);
+          const g = Math.floor(Math.random() * 255);
+          const b = Math.floor(Math.random() * 255);
+          return `rgba(${r}, ${g}, ${b}, 0.6)`;
+        });
+
+        const ctx = document.getElementById("salesByUnitChart").getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Vendas (R$)",
+              data: sales,
+              backgroundColor: colors,
+              borderColor: colors.map(c => c.replace("0.6", "1")),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return "R$ " + value.toLocaleString("pt-BR");
+                  }
+                }
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+      }
+    }
+
+    fetchAndRenderCharts();
+  </script>
+</body>
+</html>
