@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers;
@@ -10,14 +11,12 @@ class KpiVendasController extends Controller
 {
     public function index(Request $request)
     {
-        // Pega os filtros da requisição
         $ano = $request->query('ano');
         $mes = $request->query('mes');
         $unidade = $request->query('unidade');
         $vendedorId = $request->query('vendedor');
         $situacao = $request->query('situacao');
 
-        // Pega todos os consultores ativos
         $consultores = Consultor::where('ativo', 1)->get();
 
         $sellerPerformance = $consultores->map(function($consultor) use ($ano, $mes, $unidade, $vendedorId, $situacao) {
@@ -30,10 +29,13 @@ class KpiVendasController extends Controller
                 ->where('situacao', '!=', 'cancelado')
                 ->get();
 
-            // Garantir que o valor seja numérico
-            $totalSold = $vendas->sum(fn($venda) => (float) $venda->pacotes_valor_manual);
+            // Garantir que todos os campos numéricos sejam float/int, tratando NULL
+            $totalSold = $vendas->sum(fn($venda) => (float) ($venda->pacotes_valor_manual ?? 0));
             $packagesSold = $vendas->count();
             $newClients = $vendas->filter(fn($venda) => $venda->cliente_id !== null)->unique('cliente_id')->count();
+
+            // Exemplo de campos adicionais seguros
+            $additionalsSold = $vendas->sum(fn($venda) => (float) ($venda->desconto ?? 0) + (float) ($venda->acrescimo ?? 0));
 
             return [
                 'id' => $consultor->id,
@@ -42,7 +44,7 @@ class KpiVendasController extends Controller
                 'totalSold' => $totalSold,
                 'packagesSold' => $packagesSold,
                 'newClients' => $newClients,
-                'additionalsSold' => 0
+                'additionalsSold' => $additionalsSold
             ];
         });
 
