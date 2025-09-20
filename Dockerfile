@@ -45,5 +45,6 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 # Porta que o Laravel Serve vai escutar (Render define $PORT)
 EXPOSE 8000
 
-# Comando de inicialização (usando variável do Render)
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
+
+# Comando de inicialização
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
