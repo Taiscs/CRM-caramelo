@@ -24,6 +24,9 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 # Define porta
 EXPOSE 8000
 
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+
 # Comando inicial do container
 CMD sh -c "php artisan serve --host=0.0.0.0 --port=$PORT"
 
