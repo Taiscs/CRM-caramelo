@@ -18,18 +18,13 @@ COPY . .
 # Instala dependências do Laravel (sem dev)
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissões para storage e cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Garante que as pastas do storage existam e ajusta permissões
+RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} \
+    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Define porta
 EXPOSE 8000
-
-# Garante que as pastas do storage existam
-RUN mkdir -p /var/www/html/storage/framework/{sessions,views,cache} \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-
 
 # Comando inicial do container
 CMD sh -c "php artisan serve --host=0.0.0.0 --port=$PORT"
