@@ -1,9 +1,7 @@
-# ----------------------------
-# STAGE 1: Build com Composer
-# ----------------------------
-FROM php:8.2-cli AS build
+# Usa imagem PHP com FPM
+FROM php:8.2-fpm
 
-# Instala dependências do sistema
+# Instala dependências do sistema e extensões do PHP
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
@@ -11,42 +9,30 @@ RUN apt-get update && apt-get install -y \
 # Instala Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Define diretório de trabalho
-WORKDIR /app
+# Define o diretório de trabalho
+WORKDIR /var/www
 
-# Copia apenas arquivos necessários para instalar dependências
-COPY composer.json composer.lock ./
-
-# Instala dependências sem dev para produção
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# ----------------------------
-# STAGE 2: Produção
-# ----------------------------
-FROM php:8.2-fpm
-
-# Instala extensões do PHP necessárias em runtime
-RUN apt-get update && apt-get install -y \
-    libpng-dev libonig-dev libxml2-dev zip unzip \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Define diretório de trabalho
-WORKDIR /var/www/html
-
-# Copia código-fonte do Laravel
+# Copia os arquivos do projeto
 COPY . .
 
-# Copia vendor do stage de build
-COPY --from=build /app/vendor ./vendor
+# Instala dependências do Laravel (sem dev)
+RUN composer install --no-dev --optimize-autoloader
 
-# Ajusta permissões de storage e cache
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Garante que está em produção
+ENV APP_ENV=production
 
-# Porta que o Laravel Serve vai escutar (Render define $PORT)
+# Gera caches do Laravel
+RUN php artisan config:clear \
+    && php artisan cache:clear \
+    && php artisan route:cache \
+    && php artisan view:cache
+
+# Permissões para storage e cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Define porta
 EXPOSE 8000
 
+# Comando inicial do container
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
 
-
-
-# Comando de inicialização
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
