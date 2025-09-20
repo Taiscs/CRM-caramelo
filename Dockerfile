@@ -18,15 +18,6 @@ COPY . .
 # Instala dependências do Laravel (sem dev)
 RUN composer install --no-dev --optimize-autoloader
 
-# Garante que está em produção
-ENV APP_ENV=production
-
-# Gera caches do Laravel
-RUN php artisan config:clear \
-    && php artisan cache:clear \
-    && php artisan route:cache \
-    && php artisan view:cache
-
 # Permissões para storage e cache
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
@@ -35,4 +26,5 @@ EXPOSE 8000
 
 # Comando inicial do container
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
+
 
