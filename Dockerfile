@@ -9,8 +9,14 @@ RUN apt-get update && apt-get install -y \
 # Instala o Composer (pega da imagem oficial)
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Define o diretório de trabalho
+# Define diretório de trabalho
 WORKDIR /var/www/html
+
+# Ajusta permissões
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# CMD correto para Render
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
 
 # Copia os arquivos do projeto para dentro do container
 COPY . .
