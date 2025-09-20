@@ -17,7 +17,8 @@ COPY . .
 
 # Instala dependências do Laravel
 # ⚠️ Atenção: se ainda der erro, teste sem o --no-dev
-RUN composer install --no-dev --optimize-autoloader
+
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Ajusta permissões (storage e cache)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
