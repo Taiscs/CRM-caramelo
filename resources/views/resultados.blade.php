@@ -847,21 +847,31 @@ const salesData = {
 
 // ------------------ FUNÇÕES ------------------
 
+
+
 // Formata valores monetários
 function formatCurrency(value) {
-    return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-// Renderiza cards de vendedores
-function renderSellerCards(sellers) { // <-- Recebe o array de vendedores como parâmetro
+// Renderiza os cards de vendedores
+function renderSellerCards(sellers) {
     const container = document.getElementById('sellerCardsContainer');
     container.innerHTML = '';
-    
-    // Agora o loop usa o parâmetro 'sellers'
-    sellers.forEach(seller => { 
+
+    if (!Array.isArray(sellers)) {
+        console.error('renderSellerCards: sellers não é um array', sellers);
+        container.innerHTML = '<p>Não há dados de vendedores disponíveis.</p>';
+        return;
+    }
+
+    sellers.forEach(seller => {
+        // Define a foto do vendedor ou fallback
+        const photoUrl = seller.photo || 'assets/default-avatar.png';
+
         container.innerHTML += `
             <div class="seller-card">
-                <img src="${seller.photo}" alt="${seller.name}" class="seller-photo">
+                <img src="${photoUrl}" alt="${seller.name}" class="seller-photo">
                 <h6>${seller.name}</h6>
                 <div class="seller-stats">
                     <div class="stat-item">
@@ -870,7 +880,7 @@ function renderSellerCards(sellers) { // <-- Recebe o array de vendedores como p
                     </div>
                     <div class="stat-item">
                         <span class="label">Vendas Opcionais:</span>
-                        <span class="value money"></span>
+                        <span class="value money">${formatCurrency(seller.additionalsSold || 0)}</span>
                     </div>
                     <div class="stat-item">
                         <span class="label">Pacotes Vendidos:</span>
@@ -888,26 +898,34 @@ function renderSellerCards(sellers) { // <-- Recebe o array de vendedores como p
 
 // Busca os dados da API e renderiza os cards
 async function fetchAndRenderSellerCards() {
-    const ano = document.getElementById('filtroAno').value;
-    const mes = document.getElementById('filtroMes').value;
-    const unidade = document.getElementById('filtroUnidade').value;
-    const vendedor = document.getElementById('filtroVendedor').value;
-    const situacao = document.getElementById('filtroSituacao').value;
-
-    const query = new URLSearchParams({ ano, mes, unidade, vendedor, situacao }).toString();
-
     try {
-        const response = await fetch(`api/kpi-vendas?${query}`);
+        const ano = document.getElementById('filtroAno').value;
+        const mes = document.getElementById('filtroMes').value;
+        const unidade = document.getElementById('filtroUnidade').value;
+        const vendedor = document.getElementById('filtroVendedor').value;
+        const situacao = document.getElementById('filtroSituacao').value;
+
+        const query = new URLSearchParams({ ano, mes, unidade, vendedor, situacao }).toString();
+
+        const response = await fetch(`/api/kpi-vendas?${query}`);
         const data = await response.json();
-        renderSellerCards(data.sellerPerformance);
+
+        // Garante que sellerPerformance seja um array
+        const sellers = Array.isArray(data.sellerPerformance) ? data.sellerPerformance : [];
+        renderSellerCards(sellers);
     } catch (error) {
         console.error('Erro ao buscar os dados dos vendedores:', error);
+        const container = document.getElementById('sellerCardsContainer');
+        container.innerHTML = '<p>Não foi possível carregar os dados dos vendedores.</p>';
     }
 }
 
-
 // Chama a função ao carregar a página
-fetchAndRenderSellerCards();
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndRenderSellerCards();
+});
+
+
 //Grafico de vendas por vendedor
 async function renderSalesBySellerChart(filters = {}) {
     try {
