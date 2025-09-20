@@ -18,14 +18,16 @@ COPY . .
 # Instala dependências do Laravel (sem dev)
 RUN composer install --no-dev --optimize-autoloader
 
-# Cria pastas necessárias e ajusta permissões
-RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} \
-    /var/www/storage/app/public/fotos_vendedores \
-    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+# Copia e configura entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Expõe a porta (Render define a porta via variável $PORT)
+# Expõe porta
 EXPOSE 8000
 
-# Comando inicial do container
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+# Usa entrypoint para corrigir storage/cache antes de iniciar
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Comando inicial
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
+
