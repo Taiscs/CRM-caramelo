@@ -12,25 +12,17 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 # Define diretório de trabalho
 WORKDIR /var/www/html
 
-# Ajusta permissões
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# CMD correto para Render
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
-
 # Copia os arquivos do projeto para dentro do container
 COPY . .
 
 # Instala dependências do Laravel
-# ⚠️ Atenção: se ainda der erro, teste sem o --no-dev
-
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Ajusta permissões (storage e cache)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expõe a porta 8000 (Render espera um serviço rodando nessa porta)
+# Porta que o Laravel Serve vai escutar (Render define $PORT)
 EXPOSE 8000
 
-# Comando de inicialização
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Comando de inicialização (usando variável do Render)
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
