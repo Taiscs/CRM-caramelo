@@ -859,14 +859,13 @@ function renderSellerCards(sellers) {
     const container = document.getElementById('sellerCardsContainer');
     container.innerHTML = '';
 
+    // Se não for array, converte para array vazio
     if (!Array.isArray(sellers)) {
         console.error('renderSellerCards: sellers não é um array', sellers);
-        container.innerHTML = '<p>Não há dados de vendedores disponíveis.</p>';
-        return;
+        sellers = [];
     }
 
     sellers.forEach(seller => {
-        // Define a foto do vendedor ou fallback
         const photoUrl = seller.photo || 'assets/default-avatar.png';
 
         container.innerHTML += `
@@ -894,6 +893,10 @@ function renderSellerCards(sellers) {
             </div>
         `;
     });
+
+    if (sellers.length === 0) {
+        container.innerHTML = '<p>Nenhum vendedor encontrado para os filtros selecionados.</p>';
+    }
 }
 
 // Busca os dados da API e renderiza os cards
@@ -910,13 +913,13 @@ async function fetchAndRenderSellerCards() {
         const response = await fetch(`/api/kpi-vendas?${query}`);
         const data = await response.json();
 
-        // Garante que sellerPerformance seja um array
+        // Garante array
         const sellers = Array.isArray(data.sellerPerformance) ? data.sellerPerformance : [];
         renderSellerCards(sellers);
+
     } catch (error) {
         console.error('Erro ao buscar os dados dos vendedores:', error);
-        const container = document.getElementById('sellerCardsContainer');
-        container.innerHTML = '<p>Não foi possível carregar os dados dos vendedores.</p>';
+        document.getElementById('sellerCardsContainer').innerHTML = '<p>Não foi possível carregar os vendedores.</p>';
     }
 }
 
