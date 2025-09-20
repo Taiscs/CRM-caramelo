@@ -1,25 +1,46 @@
-# Usa imagem PHP com FPM
-FROM php:8.2-fpm
+# ----------------------------
+# STAGE 1: Build com Composer
+# ----------------------------
+FROM php:8.2-cli AS build
 
-# Instala dependências do sistema e extensões do PHP
+# Instala dependências do sistema
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Instala o Composer (pega da imagem oficial)
+# Instala Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+
+# Define diretório de trabalho
+WORKDIR /app
+
+# Copia apenas arquivos necessários para instalar dependências
+COPY composer.json composer.lock ./
+
+# Instala dependências sem dev para produção
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# ----------------------------
+# STAGE 2: Produção
+# ----------------------------
+FROM php:8.2-fpm
+
+# Instala extensões do PHP necessárias em runtime
+RUN apt-get update && apt-get install -y \
+    libpng-dev libonig-dev libxml2-dev zip unzip \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Define diretório de trabalho
 WORKDIR /var/www/html
 
-# Copia os arquivos do projeto para dentro do container
+# Copia código-fonte do Laravel
 COPY . .
 
-# Instala dependências do Laravel
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# Copia vendor do stage de build
+COPY --from=build /app/vendor ./vendor
 
-# Ajusta permissões (storage e cache)
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Ajusta permissões de storage e cache
+RUN chown -R www-data:www-data storage bootstrap/cache
 
 # Porta que o Laravel Serve vai escutar (Render define $PORT)
 EXPOSE 8000
