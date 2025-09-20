@@ -24,12 +24,8 @@ RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Expõe a porta que o Render vai usar
+# Expõe a porta (Render define a porta via variável $PORT)
 EXPOSE 8000
 
 # Comando inicial do container
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=$PORT"]
-
-
-
-
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
