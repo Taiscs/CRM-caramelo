@@ -45,9 +45,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 # Porta que o Laravel Serve vai escutar (Render define $PORT)
 EXPOSE 8000
 
-# Limpa o cache de configuração para garantir que a classe não seja carregada
-RUN php artisan config:clear
-RUN php artisan cache:clear
+
 
 
 # Comando de inicialização
