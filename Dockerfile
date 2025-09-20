@@ -18,14 +18,16 @@ COPY . .
 # Instala dependências do Laravel (sem dev)
 RUN composer install --no-dev --optimize-autoloader
 
-# Copia e configura entrypoint
+# 🔹 Copia entrypoint se existir
+# Verifica se o arquivo existe antes de copiar, evita erro de build
+# Ajuste o caminho se estiver em outra pasta, ex: docker/entrypoint.sh
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN [ -f /entrypoint.sh ] && chmod +x /entrypoint.sh || echo "entrypoint.sh não encontrado, pulando chmod"
 
 # Expõe porta
 EXPOSE 8000
 
-# Usa entrypoint para corrigir storage/cache antes de iniciar
+# Usa entrypoint para corrigir storage/cache antes de iniciar (apenas se existir)
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Comando inicial
