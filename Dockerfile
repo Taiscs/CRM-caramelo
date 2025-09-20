@@ -24,7 +24,11 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 # Define porta
 EXPOSE 8000
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Garante que as pastas do storage existam
+RUN mkdir -p /var/www/html/storage/framework/{sessions,views,cache} \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
 
 
 # Comando inicial do container
