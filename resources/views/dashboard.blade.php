@@ -365,9 +365,16 @@
                 <div class="label">Aguardando Resposta</div>
             </div>
 
-
-            <!-- Total de Clientes -->
+            <!-- Mensagens não lidas -->
             <div class="metric-card">
+                <div class="icon"><i class="fas fa-envelope"></i></div>
+                <div class="value text-red">{{ $total_unread_messages }}</div>
+                <div class="label">Mensagens Não Lidas</div>
+            </div>
+
+ 
+ 
+              <div class="metric-card">
                 <div class="icon"><i class="fas fa-users"></i></div>
                 <div class="value text-blue">{{ $total_clientes }}</div>
                 <div class="label">Total de Clientes</div>
