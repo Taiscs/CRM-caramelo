@@ -50,37 +50,85 @@
             color: var(--primary-pink) !important;
         }
 
-        /* Cards de Métricas Principais */
-        .metric-card {
-            background-color: var(--white);
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 30px;
-            transition: transform 0.2s ease-in-out;
-        }
-        .metric-card:hover {
-            transform: translateY(-5px);
-        }
-        .metric-card .icon {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            color: var(--primary-blue);
-        }
-        .metric-card .value {
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .metric-card .label {
-            font-size: 1rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .metric-card .value.text-pink { color: var(--primary-pink); }
-        .metric-card .value.text-blue { color: var(--primary-blue); }
+      /* Cards de Métricas Principais */
+/* Cards de Métricas Principais */
+.carousel-container {
+    position: relative;
+    overflow: hidden;
+    padding: 0 40px; /* espaço para as setas */
+}
+
+.metric-row {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    scroll-behavior: smooth;
+}
+
+/* Estilo do card */
+.metric-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    min-width: 220px;
+    flex: 0 0 auto;
+    transition: transform 0.2s ease-in-out;
+}
+.metric-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Ícones */
+.metric-card .icon {
+    font-size: 2rem;
+    color: #4a6cf7; /* cor do ícone */
+    margin-bottom: 10px;
+}
+
+/* Valores */
+.metric-card .value {
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+/* Labels */
+.metric-card .label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Botões do carrossel */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 10;
+    transition: background 0.2s;
+}
+.carousel-btn:hover {
+    background: #f0f0f0;
+}
+.carousel-btn.left { left: 5px; }
+.carousel-btn.right { right: 5px; }
+
+
+
+/* Forçar alinhamento horizontal */
+.row {
+    display: flex;
+    flex-wrap: nowrap; /* Impede quebra de linha */
+    overflow-x: auto; /* Scroll se não couber na tela */
+    gap: 10px;
+}
 
         /* Seções de Gráficos e Conteúdo */
         .card-section {
@@ -293,42 +341,70 @@
         </div>
     </nav>
 
-    <div class="container-fluid py-5">
-        <h2 class="mb-4 text-dark ps-2">Bem-vindo(a) ao Dashboard!</h2>
+   <div class="container-fluid py-5">
+    <h2 class="mb-4 text-dark ps-2">Bem-vindo(a) ao Dashboard!</h2>
 
-        <div class="row">
-            <div class="col-md-6 col-lg-3">
-                <div class="metric-card">
-                    <div class="icon"><i class="fas fa-users"></i></div>
-                    <div class="value text-blue">{{ $total_clientes }}</div>
-                    <div class="label">Total de Clientes</div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="metric-card">
-                    <div class="icon"><i class="fas fa-handshake"></i></div>
-                    <div class="value text-pink">{{ $novos_leads }}</div>
-                    <div class="label">Novos Leads (Mês)</div>
-                </div>
+    <div class="carousel-container">
+        <!-- Botão Esquerda -->
+        <button class="carousel-btn left" onclick="scrollMetrics(-1)">‹</button>
+
+        <!-- Área de Cards -->
+        <div class="metric-row" id="metricRow">
+            <!-- Total de Clientes -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-users"></i></div>
+                <div class="value text-blue">{{ $total_clientes }}</div>
+                <div class="label">Total de Clientes</div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="metric-card">
-                    <div class="icon"><i class="fas fa-chart-line"></i></div>
-                    <div class="value text-blue">{{ $taxa_conversao_formatada }}</div>
-                    <div class="label">Taxa de Conversão Geral</div>
-                </div>
+            <!-- Novos Leads -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-user-plus"></i></div>
+                <div class="value text-pink">{{ $novos_leads }}</div>
+                <div class="label">Novos Leads (Mês)</div>
             </div>
 
+            <!-- Taxa de Conversão -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-percentage"></i></div>
+                <div class="value text-blue">{{ $taxa_conversao_formatada }}</div>
+                <div class="label">Taxa de Conversão Geral</div>
+            </div>
 
-                    <div class="col-md-6 col-lg-3">
-                        <div class="metric-card">
-                            <div class="icon"><i class="fas fa-dollar-sign"></i></div>
-                            <div class="value text-pink">{{ $vendas_fechadas }}</div>
-                            <div class="label">Vendas </div>
-                </div>
+            <!-- Total de Conversas -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-comments"></i></div>
+                <div class="value text-blue"></div>
+                <div class="label">Total de Conversas</div>
+            </div>
+
+            <!-- Aguardando Resposta -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="value text-blue"></div>
+                <div class="label">Aguardando Resposta</div>
+            </div>
+
+            <!-- Vendas Fechadas -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="value text-pink">{{ $vendas_fechadas }}</div>
+                <div class="label">Vendas</div>
+            </div>
+
+            <!-- Provável Comissão -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-coins"></i></div>
+                <div class="value text-pink"></div>
+                <div class="label">Provável Comissão</div>
             </div>
         </div>
+
+        <!-- Botão Direita -->
+        <button class="carousel-btn right" onclick="scrollMetrics(1)">›</button>
+    </div>
+</div>
+
 
 <div class="row">
 <div class="col-lg-6">
@@ -470,6 +546,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+ // ---Cards ---
+
+ function scrollMetrics(direction) {
+    const row = document.getElementById("metricRow");
+    const scrollAmount = 250; // pixels por clique
+    row.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
+
+
+
         // --- Dados e Configurações dos Gráficos ---
 
         // 1. Gráfico de Clientes Novos vs. Recorrentes (Linha)
@@ -663,3 +749,5 @@ window.onload = fetchLeadsData;
     </script>
 </body>
 </html>
+  
+
