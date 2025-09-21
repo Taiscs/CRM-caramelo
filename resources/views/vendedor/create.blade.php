@@ -46,11 +46,10 @@
         @foreach($consultores as $consultor)
             <div class="col-md-3 mb-4">
                 <div class="card text-center">
-                   <img src="{{ $consultor->foto ? url($consultor->foto) : url('assets/default-avatar.png') }}" 
-                   class="card-img-top rounded-circle mx-auto mt-3" 
-                   style="width: 100px; height: 100px; object-fit: cover;">
+                   <img src="{{ $consultor->foto ? asset($consultor->foto) : asset('storage/fotos_vendedores/default-avatar.png') }}" 
+                        class="card-img-top rounded-circle mx-auto mt-3" 
+                        style="width: 100px; height: 100px; object-fit: cover;">
 
-                    
                     <div class="card-body">
                         <form action="{{ route('vendedor.update', $consultor->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
