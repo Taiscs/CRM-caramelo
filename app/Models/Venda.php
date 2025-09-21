@@ -15,9 +15,11 @@ class Venda extends Model
      * @var array
      */
     protected $casts = [
-        'total' => 'float',
+        'total' => 'integer',
+        'pacotes_valor_manual' => 'integer',
         'desconto' => 'float',
+        'orcamento' => 'float',
         'acrescimo' => 'float',
-        'pacotes_valor_manual' => 'float',
+        'total_parcelas' => 'float',
     ];
 }
