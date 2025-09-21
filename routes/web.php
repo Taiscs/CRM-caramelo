@@ -9,6 +9,8 @@ use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ConsultorController;
+use App\Http\Controllers\VendedorController;
+
  
 
 // Rota do Dashboard
@@ -37,11 +39,11 @@ Route::post('/sincronizar-contato', [ContatoController::class, 'sincronizarConta
 Route::get('/relatorios/kpis', [RelatorioController::class, 'kpis'])->name('relatorios.kpis');
 
 //Cadastrar vendedor
-Route::get('/vendedor/create', [ConsultorController::class, 'create'])->name('vendedor.create');
-Route::post('/vendedor/store', [ConsultorController::class, 'store'])->name('vendedor.store');
-Route::put('/vendedor/{id}/foto', [ConsultorController::class, 'updateFoto'])->name('vendedor.updateFoto');
-Route::put('/vendedor/{id}/update', [ConsultorController::class, 'update'])->name('vendedor.update');
- 
-
+Route::get('/vendedor/create', [VendedorController::class, 'create'])->name('vendedor.create');
+Route::post('/vendedor/store', [VendedorController::class, 'store'])->name('vendedor.store');
+Route::put('/vendedor/update/{id}', [VendedorController::class, 'update'])->name('vendedor.update');
+Route::get('/vendedor/edit/{id}', [VendedorController::class, 'edit'])->name('vendedor.edit');
+// Rota para remover vendedor
+Route::delete('/vendedor/destroy/{id}', [VendedorController::class, 'destroy'])->name('vendedor.destroy');
 
 
