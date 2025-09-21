@@ -52,12 +52,12 @@ class ClientemaiorController extends Controller
             ->orderByDesc('valorTotalCompras')
             ->first();
 
-        // Retorna os dados em formato JSON
+        // Retorna os dados em formato JSON, garantindo a conversão para float
         return response()->json([
             'clienteMaisComprou' => [
-                'cliente' => $clienteMaisComprou->cliente ?? '-', 
-                'totalCompras' => $clienteMaisComprou->totalCompras ?? 0, 
-                'valorTotal' => $clienteMaisComprou->valorTotalCompras ?? 0
+                'cliente' => $clienteMaisComprou->cliente ?? '-',
+                'totalCompras' => $clienteMaisComprou->totalCompras ?? 0,
+                'valorTotal' => (float) ($clienteMaisComprou->valorTotalCompras ?? 0)
             ]
         ]);
     }
