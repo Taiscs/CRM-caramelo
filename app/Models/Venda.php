@@ -21,5 +21,6 @@ class Venda extends Model
         'orcamento' => 'float',
         'acrescimo' => 'float',
         'total_parcelas' => 'float',
+        'marketing' => 'integer',
     ];
 }
