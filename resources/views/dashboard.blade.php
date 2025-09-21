@@ -350,6 +350,22 @@
 
         <!-- Área de Cards -->
         <div class="metric-row" id="metricRow">
+
+                       <!-- Total de Conversas -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-comments"></i></div>
+                <div class="value text-blue">{{ $total_conversas }}</div>
+                <div class="label">Total de Conversas</div>
+            </div>
+
+           <!-- Aguardando Resposta -->
+            <div class="metric-card">
+                <div class="icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="value text-blue">{{ $total_aguardando_resposta }}</div>
+                <div class="label">Aguardando Resposta</div>
+            </div>
+
+
             <!-- Total de Clientes -->
             <div class="metric-card">
                 <div class="icon"><i class="fas fa-users"></i></div>
@@ -371,22 +387,10 @@
                 <div class="label">Taxa de Conversão Geral</div>
             </div>
 
-            <!-- Total de Conversas -->
-            <div class="metric-card">
-                <div class="icon"><i class="fas fa-comments"></i></div>
-                <div class="value text-blue"></div>
-                <div class="label">Total de Conversas</div>
-            </div>
-
-            <!-- Aguardando Resposta -->
-            <div class="metric-card">
-                <div class="icon"><i class="fas fa-hourglass-half"></i></div>
-                <div class="value text-blue"></div>
-                <div class="label">Aguardando Resposta</div>
-            </div>
+         
 
             <!-- Vendas Fechadas -->
-            <div class="metric-card">
+            <div class="metric-card">  
                 <div class="icon"><i class="fas fa-shopping-cart"></i></div>
                 <div class="value text-pink">{{ $vendas_fechadas }}</div>
                 <div class="label">Vendas</div>
@@ -404,6 +408,9 @@
         <button class="carousel-btn right" onclick="scrollMetrics(1)">›</button>
     </div>
 </div>
+
+
+  
 
 
 <div class="row">
