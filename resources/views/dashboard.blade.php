@@ -429,7 +429,7 @@
         <div class="mb-3">
             <label for="anoFiltro">Ano:</label>
             <select id="anoFiltro" class="form-control">
-                <option value="todos">Todos os anos</option> <!-- opção para todos os anos -->
+                <option ></option> <!-- opção para todos os anos -->
                 @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
                     <option value="{{ $i }}">{{ $i }}</option>
                 @endfor
