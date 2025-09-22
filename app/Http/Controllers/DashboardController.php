@@ -38,33 +38,29 @@ class DashboardController extends Controller
         $total_unread_messages = 0;
 
         // Requisição para API Jetsales via Service
-        $data = $jetsales->get('tickets', [
-            'searchParam' => '',
-            'showAll' => false,                 // booleano
-            'withUnreadMessages' => false,      // booleano
-            'isNotAssignedUser' => false,       // booleano
-            'includeNotQueueDefined' => true,   // booleano
-            'isChatBot' => false,               // booleano
-            'pageNumber' => 1,
-            'status' => 'open'
-        ]);
+                $data = $jetsales->get('tickets', [
+                'searchParam' => '',
+                'showAll' => false,
+                'withUnreadMessages' => false,
+                'isNotAssignedUser' => false,
+                'includeNotQueueDefined' => true,
+                'isChatBot' => false,
+                'pageNumber' => 1,
+                'status' => 'open'
+            ]);
+
 
         if (!empty($data)) {
-            $total_conversas = (int) ($data['count'] ?? 0);
+            $total_conversas = $data['count'] ?? 0;
 
             if (!empty($data['tickets'])) {
                 $tickets = collect($data['tickets']);
 
-                // Tickets aguardando resposta (answered = false)
                 $total_aguardando_resposta = $tickets
-                    ->filter(function($ticket) {
-                        // converte para booleano caso venha string
-                        $answered = is_bool($ticket['answered']) ? $ticket['answered'] : filter_var($ticket['answered'], FILTER_VALIDATE_BOOLEAN);
-                        return $ticket['status'] === 'open' && !$answered;
-                    })
+                    ->where('status', 'open')
+                    ->where('answered', false)
                     ->count();
 
-                // Total de mensagens não lidas
                 $total_unread_messages = $tickets->sum('unreadMessages');
             }
         }
