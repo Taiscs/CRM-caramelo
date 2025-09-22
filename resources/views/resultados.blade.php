@@ -874,7 +874,7 @@ function renderSellerCards(sellers) {
 
     sellers.forEach(seller => {
         // Se a foto existir, usa; senão, usa avatar padrão
-        let photoUrl = seller.photo || 'assets/default-avatar.png';
+        let photoUrl = seller.photo || 'storage/fotos_vendedores/default-avatar.png';
 
         // Ajusta URLs locais (ex: localhost) caso necessário
         if (photoUrl.includes('localhost')) {
@@ -888,7 +888,7 @@ function renderSellerCards(sellers) {
 
         html += `
             <div class="seller-card">
-                <img src="${photoUrl}" alt="${seller.name}" class="seller-photo" onerror="this.src='assets/default-avatar.png'">
+                <img src="${photoUrl}" alt="${seller.name}" class="seller-photo" onerror="this.src='storage/fotos_vendedores/default-avatar.png'">
                 <h6>${seller.name}</h6>
                 <div class="seller-stats">
                     <div class="stat-item">
