@@ -849,12 +849,6 @@ const salesData = {
 
 
 // Formata valores monetários
-
-window.leadsApiUrlChart = "{{ app()->environment('local') ? url('api/leads-por-fonte') : secure_url('api/leads-por-fonte') }}";
-
-function formatCurrency(value) {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
 // Renderiza os cards de vendedores
 function renderSellerCards(sellers) {
     const container = document.getElementById('sellerCardsContainer');
@@ -875,6 +869,11 @@ function renderSellerCards(sellers) {
         // Ajusta URLs locais (ex: localhost) caso necessário
         if (photoUrl.includes('localhost')) {
             photoUrl = photoUrl.replace('localhost', window.location.host);
+        }
+
+        // Força https caso venha http
+        if (photoUrl.startsWith('http://')) {
+            photoUrl = photoUrl.replace('http://', 'https://');
         }
 
         html += `
@@ -927,6 +926,11 @@ async function fetchAndRenderSellerCards() {
 
         renderSellerCards(sellers);
 
+        // 👉 Se ainda tiver em algum lugar a função antiga, chama a nova
+        if (typeof renderSalesBySellerChart === "function") {
+            renderSalesBySellerChart(sellers);
+        }
+
     } catch (error) {
         console.error('Erro ao buscar os dados dos vendedores:', error);
         document.getElementById('sellerCardsContainer').innerHTML = '<p>Não foi possível carregar os vendedores.</p>';
@@ -942,130 +946,6 @@ document.addEventListener('DOMContentLoaded', () => {
 document.querySelectorAll('#filtroAno, #filtroMes, #filtroUnidade, #filtroVendedor, #filtroSituacao')
     .forEach(el => el.addEventListener('change', fetchAndRenderSellerCards));
 
-
-
-
-//Grafico de vendas por vendedor
-async function renderSalesBySellerChart(filters = {}) {
-    try {
-        // Monta query string com os filtros
-        const params = new URLSearchParams(filters).toString();
-        const url = 'api/vendas-totais-por-vendedor' + (params ? '?' + params : '');
-
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-
-        const result = await response.json();
-
-        // Ordena pelo valor total
-        result.sort((a,b) => b.valor_total - a.valor_total);
-
-        const labels = result.map(r => `${r.nome_consultor.trim()} ${r.sobrenome_consultor.trim()}`);
-        const dataQuantidade = result.map(r => r.quantidade);
-        const dataValor = result.map(r => r.valor_total);
-
-        const ctx = document.getElementById('packageSalesBySellerChart').getContext('2d');
-        if (packageSalesBySellerChart) packageSalesBySellerChart.destroy();
-
-        packageSalesBySellerChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [
-                    {
-                        label: 'Quantidade de Vendas',
-                        data: dataQuantidade,
-                        backgroundColor: 'rgba(255,105,180,0.7)',
-                        borderColor: 'rgba(255,105,180,1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Valor Total (R$)',
-                        data: dataValor,
-                        backgroundColor: 'rgba(100,149,237,0.7)',
-                        borderColor: 'rgba(100,149,237,1)',
-                        borderWidth: 1,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Quantidade' }
-                    },
-                    y1: {
-                        position: 'right',
-                        beginAtZero: true,
-                        ticks: { callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR') },
-                        grid: { drawOnChartArea: false }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                            label: function(context) {
-                                const idx = context.dataIndex;
-                                if(context.dataset.label === 'Quantidade de Vendas') {
-                                    return `Qtd: ${dataQuantidade[idx]}`;
-                                } else {
-                                    return `Valor: R$ ${Number(dataValor[idx]).toLocaleString('pt-BR')}`;
-                                }
-                            }
-                        }
-                    },
-                    title: { display: true, text: '' },
-                    legend: { display: true }
-                },
-                interaction: { mode: 'nearest', axis: 'y', intersect: false }
-            }
-        });
-
-    } catch(e) {
-        console.error('Erro ao buscar vendas por vendedor:', e);
-    }
-}
-
-// Chamada inicial sem filtros
-renderSalesBySellerChart();
-
-// Exemplo: atualizar quando algum filtro mudar
-['filtroAno', 'filtroMes', 'filtroUnidade', 'filtroVendedor', 'filtroSituacao'].forEach(id => {
-    const select = document.getElementById(id);
-    if(select){
-        select.addEventListener('change', () => {
-            const filters = {
-                ano: $('#filtroAno').val(),
-                mes: $('#filtroMes').val(),
-                unidade: $('#filtroUnidade').val(),
-                vendedor: $('#filtroVendedor').val(),
-                situacao: $('#filtroSituacao').val()
-            };
-            renderSalesBySellerChart(filters);
-        });
-    }
-});
-const filtros = ['filtroAno', 'filtroMes', 'filtroUnidade', 'filtroVendedor', 'filtroSituacao'];
-
-filtros.forEach(id => {
-    const select = document.getElementById(id);
-    if(select){
-        select.addEventListener('change', () => {
-            fetchAndRenderSellerCards(); // atualiza os cards quando o filtro mudar
-        });
-    }
-});
-
-// Chama a função ao carregar a página
-document.addEventListener('DOMContentLoaded', () => {
-    fetchAndRenderSellerCards();
-});
 // Renderiza gráfico de vendas por pacote
 // Certifique-se de ter importado o plugin ChartDataLabels
 Chart.register(ChartDataLabels);
