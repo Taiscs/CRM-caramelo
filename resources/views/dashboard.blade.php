@@ -645,9 +645,10 @@ anoFiltro.addEventListener('change', () => {
 
 // 2. Gráfico de Leads por Fonte (Rosca - Donut)
 
-    // Define a URL da API usando Blade
        // Define a URL da API usando Blade (isso roda no servidor na geração do HTML)
-    window.leadsApiUrl = "{{ url('api/leads-por-fonte') }}";
+   window.leadsApiUrl = "{{ secure_url('api/leads-por-fonte') }}";
+
+
 
     // Pega os elementos
     const leadsSourceChart = document.getElementById('leadsSourceChart');
@@ -789,3 +790,4 @@ anoFiltro.addEventListener('change', () => {
 </html>
   
 
+  
