@@ -15,7 +15,7 @@ public function create()
 
     // Pega todos os consultores e adiciona a propriedade 'photo' com URL completa
     $consultores = Consultor::all()->map(function ($c) {
-        $c->photo = $c->Foto ? url($c->Foto) : url('assets/default-avatar.png');
+        $c->photo = $c->Foto ? url($c->Foto) : url('storage/fotos_vendedores/default-avatar.png');
         return $c;
     });
 
