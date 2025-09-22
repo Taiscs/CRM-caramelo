@@ -444,6 +444,8 @@
             <div class="col-lg-3">
                 <div class="card-section">
                     <h4>Leads por Fonte</h4>
+                    <p>{{ url('api/leads-por-fonte') }}</p>
+
                     <!-- Indicador de carregamento para o gráfico de Leads -->
                     <div id="leadsLoading" class="loading-spinner">
                         <div class="spinner-border" role="status">
@@ -640,78 +642,65 @@ anoFiltro.addEventListener('change', () => {
 
 // 2. Gráfico de Leads por Fonte (Rosca - Donut)
 
- window.leadsApiUrl = "{{ url('https://crm-caramelo.onrender.com/api/leads-por-fonte') }}";
-const leadsSourceChart = document.getElementById('leadsSourceChart');
-const leadsLoading = document.getElementById('leadsLoading');
+    // Define a URL da API usando Blade
+    window.leadsApiUrl = "{{ url('api/leads-por-fonte') }}";
 
-async function fetchLeadsData() {
-    if (!leadsSourceChart || !leadsLoading) return;
+    const leadsSourceChart = document.getElementById('leadsSourceChart');
+    const leadsLoading = document.getElementById('leadsLoading');
 
-    leadsLoading.style.display = 'flex';
-    leadsSourceChart.style.display = 'none';
+    async function fetchLeadsData() {
+        if (!leadsSourceChart || !leadsLoading) return;
 
-    try {
-        // Usa a URL definida no Blade
-        const response = await fetch(window.leadsApiUrl);
+        leadsLoading.style.display = 'flex';
+        leadsSourceChart.style.display = 'none';
 
-        if (!response.ok) {
-            throw new Error(`Erro de rede: ${response.status}`);
-        }
+        try {
+            const response = await fetch(window.leadsApiUrl);
 
-        const rawData = await response.json();
-
-        const labels = rawData.map(item => item.fonte);
-        const data = rawData.map(item => item.total);
-
-        // Cores fixas para o gráfico
-        const backgroundColors = [
-            '#FF6384', // pink
-            '#36A2EB', // blue
-            '#8A2BE2', // purple
-            '#FFD700', // gold
-            '#FF4500', // orange
-            '#4682B4'  // steelblue
-        ];
-
-        const chartData = {
-            labels,
-            datasets: [{
-                data,
-                backgroundColor: backgroundColors.slice(0, labels.length),
-                hoverOffset: 10
-            }]
-        };
-
-        const leadsSourceCtx = leadsSourceChart.getContext('2d');
-
-        // Remove gráfico antigo se existir
-        if (window.leadsChartInstance) {
-            window.leadsChartInstance.destroy();
-        }
-
-        window.leadsChartInstance = new Chart(leadsSourceCtx, {
-            type: 'doughnut',
-            data: chartData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+            if (!response.ok) {
+                throw new Error(`Erro de rede: ${response.status}`);
             }
-        });
 
-        leadsSourceChart.style.display = 'block';
+            const rawData = await response.json();
+            const labels = rawData.map(item => item.fonte);
+            const data = rawData.map(item => item.total);
 
-    } catch (error) {
-        console.error("Erro ao buscar os dados do gráfico:", error);
-    } finally {
-        leadsLoading.style.display = 'none';
+            const backgroundColors = ['#FF6384','#36A2EB','#8A2BE2','#FFD700','#FF4500','#4682B4'];
+
+            const chartData = {
+                labels,
+                datasets: [{
+                    data,
+                    backgroundColor: backgroundColors.slice(0, labels.length),
+                    hoverOffset: 10
+                }]
+            };
+
+            const ctx = leadsSourceChart.getContext('2d');
+
+            if (window.leadsChartInstance) window.leadsChartInstance.destroy();
+
+            window.leadsChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            leadsSourceChart.style.display = 'block';
+        } catch (error) {
+            console.error("Erro ao buscar os dados do gráfico:", error);
+        } finally {
+            leadsLoading.style.display = 'none';
+        }
     }
-}
 
-// Chama a função quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', fetchLeadsData);
+    document.addEventListener('DOMContentLoaded', fetchLeadsData);
 
 // Chama a função para buscar e renderizar os dados quando a página carregar.
 //window.onload = fetchLeadsData;
