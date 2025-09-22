@@ -639,71 +639,71 @@ anoFiltro.addEventListener('change', () => {
 });
 
 
-
 // 2. Gráfico de Leads por Fonte (Rosca - Donut)
 
-    // Define a URL da API usando Blade
-    window.leadsApiUrl = "{{ url('api/leads-por-fonte') }}";
+// Define a URL da API usando Blade, variável separada para o gráfico
+window.leadsApiUrlChart = "{{ secure_url('api/leads-por-fonte') }}";
 
-    const leadsSourceChart = document.getElementById('leadsSourceChart');
-    const leadsLoading = document.getElementById('leadsLoading');
+const leadsSourceChart = document.getElementById('leadsSourceChart');
+const leadsLoading = document.getElementById('leadsLoading');
 
-    async function fetchLeadsData() {
-        if (!leadsSourceChart || !leadsLoading) return;
+async function fetchLeadsData() {
+    if (!leadsSourceChart || !leadsLoading) return;
 
-        leadsLoading.style.display = 'flex';
-        leadsSourceChart.style.display = 'none';
+    // Mostrar carregando
+    leadsLoading.style.display = 'flex';
+    leadsSourceChart.style.display = 'none';
 
-        try {
-            const response = await fetch(window.leadsApiUrl);
+    try {
+        // Usa a URL exclusiva do gráfico
+        const response = await fetch(window.leadsApiUrlChart);
 
-            if (!response.ok) {
-                throw new Error(`Erro de rede: ${response.status}`);
-            }
-
-            const rawData = await response.json();
-            const labels = rawData.map(item => item.fonte);
-            const data = rawData.map(item => item.total);
-
-            const backgroundColors = ['#FF6384','#36A2EB','#8A2BE2','#FFD700','#FF4500','#4682B4'];
-
-            const chartData = {
-                labels,
-                datasets: [{
-                    data,
-                    backgroundColor: backgroundColors.slice(0, labels.length),
-                    hoverOffset: 10
-                }]
-            };
-
-            const ctx = leadsSourceChart.getContext('2d');
-
-            if (window.leadsChartInstance) window.leadsChartInstance.destroy();
-
-            window.leadsChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: chartData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-
-            leadsSourceChart.style.display = 'block';
-        } catch (error) {
-            console.error("Erro ao buscar os dados do gráfico:", error);
-        } finally {
-            leadsLoading.style.display = 'none';
+        if (!response.ok) {
+            throw new Error(`Erro de rede: ${response.status}`);
         }
+
+        const rawData = await response.json();
+        const labels = rawData.map(item => item.fonte);
+        const data = rawData.map(item => item.total);
+
+        const backgroundColors = ['#FF6384','#36A2EB','#8A2BE2','#FFD700','#FF4500','#4682B4'];
+
+        const chartData = {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: backgroundColors.slice(0, labels.length),
+                hoverOffset: 10
+            }]
+        };
+
+        const ctx = leadsSourceChart.getContext('2d');
+
+        // Destrói o gráfico antigo antes de criar um novo
+        if (window.leadsChartInstance) window.leadsChartInstance.destroy();
+
+        window.leadsChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        leadsSourceChart.style.display = 'block';
+    } catch (error) {
+        console.error("Erro ao buscar os dados do gráfico:", error);
+    } finally {
+        leadsLoading.style.display = 'none';
     }
+}
 
-    document.addEventListener('DOMContentLoaded', fetchLeadsData);
+document.addEventListener('DOMContentLoaded', fetchLeadsData);
 
-// Chama a função para buscar e renderizar os dados quando a página carregar.
-//window.onload = fetchLeadsData;
 
         // 3. Gráfico de Funil de Vendas (Barras Horizontais Empilhadas para Simular Funil)
         const salesFunnelCtx = document.getElementById('salesFunnelChart').getContext('2d');
