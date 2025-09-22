@@ -56,30 +56,34 @@ class DashboardController extends Controller
             'status' => 'open'
         ]);
 
-        if (!empty($data) && !empty($data['tickets'])) {
-            $tickets = collect($data['tickets']);
-
+        if (!empty($data)) {
             $total_conversas = (int) ($data['count'] ?? 0);
 
-            // Tickets aguardando resposta
-            $total_aguardando_resposta = $tickets
-                ->filter(function($ticket) {
-                    $answered = is_bool($ticket['answered']) 
-                        ? $ticket['answered'] 
-                        : filter_var($ticket['answered'], FILTER_VALIDATE_BOOLEAN);
-                    return $ticket['status'] === 'open' && !$answered;
-                })
-                ->count();
+            if (!empty($data['tickets'])) {
+                $tickets = collect($data['tickets']);
 
-            // Total de mensagens não lidas
-            $total_unread_messages = $tickets->sum('unreadMessages');
+                // Tickets aguardando resposta
+                $total_aguardando_resposta = $tickets
+                    ->filter(function($ticket) {
+                        $answered = is_bool($ticket['answered']) 
+                            ? $ticket['answered'] 
+                            : filter_var($ticket['answered'], FILTER_VALIDATE_BOOLEAN);
+                        return $ticket['status'] === 'open' && !$answered;
+                    })
+                    ->count();
 
-            // Contagem apenas de tickets com leadstatus definido
-            $leadStatusCounts = $tickets
-                ->filter(fn($ticket) => !empty($ticket['leadstatus']['queue']))
-                ->groupBy(fn($ticket) => $ticket['leadstatus']['queue'])
-                ->map(fn($group) => count($group))
-                ->toArray();
+                // Total de mensagens não lidas
+                $total_unread_messages = $tickets->sum('unreadMessages');
+
+                // Contagem por leadstatus
+                foreach ($tickets as $ticket) {
+                    $statusName = $ticket['leadstatus']['queue'] ?? 'Sem Status';
+                    if (!isset($leadStatusCounts[$statusName])) {
+                        $leadStatusCounts[$statusName] = 0;
+                    }
+                    $leadStatusCounts[$statusName]++;
+                }
+            }
         }
 
         // ---------------------------
