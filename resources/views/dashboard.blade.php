@@ -640,7 +640,7 @@ anoFiltro.addEventListener('change', () => {
 
 // 2. Gráfico de Leads por Fonte (Rosca - Donut)
 
- window.leadsApiUrl = "{{ url('api/leads-por-fonte') }}";
+ window.leadsApiUrl = "{{ url('https://crm-caramelo.onrender.com/api/leads-por-fonte') }}";
 const leadsSourceChart = document.getElementById('leadsSourceChart');
 const leadsLoading = document.getElementById('leadsLoading');
 
