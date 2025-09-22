@@ -39,7 +39,8 @@ class KpiVendasController extends Controller
             return [
                 'id' => $consultor->id,
                 'name' => $consultor->nome_consultor . ' ' . $consultor->sobrenome_consultor,
-                'photo' => $consultor->foto  ? url($consultor->foto)  : url('storage/fotos_vendedores/default-avatar.png'),
+               'photo' => $consultor->foto  ? url('storage/fotos_vendedores/' . $consultor->foto)  : url('storage/fotos_vendedores/default-avatar.png'),
+
                 'totalSold' => $totalSold,
                 'packagesSold' => $packagesSold,
                 'newClients' => $newClients,
