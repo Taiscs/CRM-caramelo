@@ -849,6 +849,16 @@ const salesData = {
 
 
 // Formata valores monetários
+
+// Função global para formatar valores em R$
+function formatCurrency(value) {
+    if (value === null || value === undefined) return "R$ 0,00";
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+}
+
 // Renderiza os cards de vendedores
 function renderSellerCards(sellers) {
     const container = document.getElementById('sellerCardsContainer');
