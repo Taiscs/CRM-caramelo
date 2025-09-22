@@ -458,6 +458,7 @@
             <div class="col-lg-3">
                 <div class="card-section">
                     <h4>Funil de Vendas</h4>
+                    
                     <canvas id="salesFunnelChart"></canvas>
                 </div>
             </div>
@@ -703,60 +704,64 @@ async function fetchLeadsData() {
 
 document.addEventListener('DOMContentLoaded', fetchLeadsData);
 
+    // Converte o array PHP enviado do controller para JS
+    const leadStatusData = @json($leadStatusCounts);
 
-        // 3. Gráfico de Funil de Vendas (Barras Horizontais Empilhadas para Simular Funil)
-        const salesFunnelCtx = document.getElementById('salesFunnelChart').getContext('2d');
-        new Chart(salesFunnelCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Leads', 'Qualificados', 'Proposta', 'Negociação', 'Fechados'],
-                datasets: [{
-                    label: 'Número de Leads',
-                    data: [300, 200, 150, 100, 50],
-                    backgroundColor: [
-                        'rgba(100, 149, 237, 0.8)',
-                        'rgba(100, 149, 237, 0.7)',
-                        'rgba(100, 149, 237, 0.6)',
-                        'rgba(255, 105, 180, 0.7)',
-                        'rgba(255, 105, 180, 0.8)'
-                    ],
-                    borderColor: [
-                        'var(--primary-blue)',
-                        'var(--primary-blue)',
-                        'var(--primary-blue)',
-                        'var(--primary-pink)',
-                        'var(--primary-pink)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Quantidade'
-                        }
+    // Labels e valores para o gráfico
+    const labels = Object.keys(leadStatusData);
+    const dataValues = Object.values(leadStatusData);
+
+    // Cria o gráfico de barras horizontal
+    const salesFunnelCtx = document.getElementById('salesFunnelChart').getContext('2d');
+    new Chart(salesFunnelCtx, {
+        type: 'bar',
+        data: {
+            labels: labels,        // pega os status do lead
+            datasets: [{
+                label: 'Número de Leads',
+                data: dataValues,   // pega as quantidades por status
+                backgroundColor: [
+                    'rgba(100, 149, 237, 0.8)',
+                    'rgba(100, 149, 237, 0.7)',
+                    'rgba(100, 149, 237, 0.6)',
+                    'rgba(255, 105, 180, 0.7)',
+                    'rgba(255, 105, 180, 0.8)'
+                ],
+                borderColor: [
+                    'var(--primary-blue)',
+                    'var(--primary-blue)',
+                    'var(--primary-blue)',
+                    'var(--primary-pink)',
+                    'var(--primary-pink)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // horizontal
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade'
                     }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ': ' + context.parsed.x;
-                            }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed.x;
                         }
                     }
                 }
             }
-        });
+        }
+    });
     </script>
 </body>
 </html>
