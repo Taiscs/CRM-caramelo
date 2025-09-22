@@ -53,14 +53,20 @@ class GraficosController extends Controller
                     ->groupBy('cliente')
                     ->havingRaw('MIN(cadastro) BETWEEN ? AND ?', [$inicioMes, $fimMes])
                     ->count();
+                    // Clientes recorrentes: compraram no mês, mas já tinham comprado antes
+                    $recorrente = DB::table('vendas as v')
+                        ->where('v.situacao', '!=', 'cancelado')
+                        ->whereBetween('v.cadastro', [$inicioMes, $fimMes])
+                        ->whereExists(function ($query) use ($inicioMes) {
+                            $query->select(DB::raw(1))
+                                ->from('vendas as v2')
+                                ->whereColumn('v2.cliente', 'v.cliente')
+                                ->where('v2.cadastro', '<', $inicioMes)
+                                ->where('v2.situacao', '!=', 'cancelado');
+                        })
+                        ->distinct('v.cliente')
+                        ->count();
 
-                // Clientes recorrentes: já compraram antes do mês
-                $recorrente = DB::table('vendas')
-                    ->select('cliente')
-                    ->where('situacao', '!=', 'cancelado')
-                    ->where('cadastro', '<', $inicioMes)
-                    ->distinct()
-                    ->count();
 
                 $novos_clientes[] = $novos;
                 $recorrentes[] = $recorrente;
