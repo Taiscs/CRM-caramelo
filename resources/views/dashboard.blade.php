@@ -355,7 +355,7 @@
             <div class="metric-card">
                 <div class="icon"><i class="fas fa-comments"></i></div>
                 <div class="value text-blue">{{ $total_conversas }}</div>
-                <div class="label">Total de Conversas</div>
+                <div class="label">Total de Conversas Atvas</div>
             </div>
 
            <!-- Aguardando Resposta -->
@@ -444,8 +444,7 @@
             <div class="col-lg-3">
                 <div class="card-section">
                     <h4>Leads por Fonte</h4>
-                    <p>{{ url('api/leads-por-fonte') }}</p>
-
+                
                     <!-- Indicador de carregamento para o gráfico de Leads -->
                     <div id="leadsLoading" class="loading-spinner">
                         <div class="spinner-border" role="status">
