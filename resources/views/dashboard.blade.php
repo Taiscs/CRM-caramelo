@@ -643,12 +643,13 @@ const leadsSourceChart = document.getElementById('leadsSourceChart');
 const leadsLoading = document.getElementById('leadsLoading');
 
 async function fetchLeadsData() {
+    if (!leadsSourceChart || !leadsLoading) return;
+
     leadsLoading.style.display = 'flex';
     leadsSourceChart.style.display = 'none';
 
     try {
-        // Faz a chamada para a rota Laravel
-        const response = await fetch('{{ url("api/leads-por-fonte") }}');
+        const response = await fetch(window.leadsApiUrl);
 
         if (!response.ok) {
             throw new Error(`Erro de rede: ${response.status}`);
@@ -656,33 +657,36 @@ async function fetchLeadsData() {
 
         const rawData = await response.json();
 
-        // Agora usamos o campo "fonte" vindo do backend
         const labels = rawData.map(item => item.fonte);
         const data = rawData.map(item => item.total);
 
-        // Define as cores dinamicamente.
+        // Definindo cores fixas para não depender do CSS
         const backgroundColors = [
-            'var(--primary-pink)',
-            'var(--primary-blue)',
-            '#8A2BE2',
-            '#FFD700',
-            '#FF4500',
-            '#4682B4'
+            '#FF6384', // pink
+            '#36A2EB', // blue
+            '#8A2BE2', // purple
+            '#FFD700', // gold
+            '#FF4500', // orange
+            '#4682B4'  // steelblue
         ];
 
         const chartData = {
-            labels: labels,
+            labels,
             datasets: [{
-                data: data,
+                data,
                 backgroundColor: backgroundColors.slice(0, labels.length),
                 hoverOffset: 10
             }]
         };
 
-        // Mostra o gráfico e o renderiza com os novos dados.
-        leadsSourceChart.style.display = 'block';
         const leadsSourceCtx = leadsSourceChart.getContext('2d');
-        new Chart(leadsSourceCtx, {
+
+        // Remove gráfico antigo se existir
+        if (window.leadsChartInstance) {
+            window.leadsChartInstance.destroy();
+        }
+
+        window.leadsChartInstance = new Chart(leadsSourceCtx, {
             type: 'doughnut',
             data: chartData,
             options: {
@@ -696,16 +700,20 @@ async function fetchLeadsData() {
             }
         });
 
+        leadsSourceChart.style.display = 'block';
+
     } catch (error) {
         console.error("Erro ao buscar os dados do gráfico:", error);
     } finally {
-        // Esconde o indicador de carregamento, independentemente de sucesso ou erro.
         leadsLoading.style.display = 'none';
     }
 }
 
+// Chama a função quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', fetchLeadsData);
+
 // Chama a função para buscar e renderizar os dados quando a página carregar.
-window.onload = fetchLeadsData;
+//window.onload = fetchLeadsData;
 
         // 3. Gráfico de Funil de Vendas (Barras Horizontais Empilhadas para Simular Funil)
         const salesFunnelCtx = document.getElementById('salesFunnelChart').getContext('2d');
