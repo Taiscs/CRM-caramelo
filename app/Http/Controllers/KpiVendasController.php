@@ -28,19 +28,20 @@ class KpiVendasController extends Controller
                 ->where('situacao', '!=', 'cancelado')
                 ->get();
 
-            // Garantir que todos os campos numéricos sejam float/int, tratando NULL
             $totalSold = $vendas->sum(fn($venda) => (float) ($venda->pacotes_valor_manual ?? 0));
             $packagesSold = $vendas->count();
             $newClients = $vendas->filter(fn($venda) => $venda->cliente_id !== null)->unique('cliente_id')->count();
-
-            // Exemplo de campos adicionais seguros
             $additionalsSold = $vendas->sum(fn($venda) => (float) ($venda->desconto ?? 0) + (float) ($venda->acrescimo ?? 0));
+
+            // Use asset() para garantir URL correta
+            $photoUrl = $consultor->foto && file_exists(public_path($consultor->foto))
+                ? asset($consultor->foto)
+                : asset('storage/fotos_vendedores/default-avatar.png');
 
             return [
                 'id' => $consultor->id,
                 'name' => $consultor->nome_consultor . ' ' . $consultor->sobrenome_consultor,
-               'photo' => $consultor->foto  ? url('storage/fotos_vendedores/' . $consultor->foto)  : url('storage/fotos_vendedores/default-avatar.png'),
-
+                'photo' => $photoUrl,
                 'totalSold' => $totalSold,
                 'packagesSold' => $packagesSold,
                 'newClients' => $newClients,
@@ -53,4 +54,3 @@ class KpiVendasController extends Controller
         ]);
     }
 }
-  
