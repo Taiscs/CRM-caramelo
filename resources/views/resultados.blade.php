@@ -848,29 +848,38 @@ const salesData = {
 // ------------------ FUNÇÕES ------------------
 
 
-
 // Formata valores monetários
+
+window.leadsApiUrlChart = "{{ app()->environment('local') ? url('api/leads-por-fonte') : secure_url('api/leads-por-fonte') }}";
+
 function formatCurrency(value) {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
-
 // Renderiza os cards de vendedores
 function renderSellerCards(sellers) {
     const container = document.getElementById('sellerCardsContainer');
     container.innerHTML = '';
 
-    // Se não for array, converte para array vazio
-    if (!Array.isArray(sellers)) {
-        console.error('renderSellerCards: sellers não é um array', sellers);
-        sellers = [];
+    if (!Array.isArray(sellers) || sellers.length === 0) {
+        container.innerHTML = '<p>Nenhum vendedor encontrado para os filtros selecionados.</p>';
+        console.error('renderSellerCards: sellers não é um array ou está vazio', sellers);
+        return;
     }
 
-    sellers.forEach(seller => {
-        const photoUrl = seller.photo || 'assets/default-avatar.png';
+    let html = '';
 
-        container.innerHTML += `
+    sellers.forEach(seller => {
+        // Se a foto existir, usa; senão, usa avatar padrão
+        let photoUrl = seller.photo || 'assets/default-avatar.png';
+
+        // Ajusta URLs locais (ex: localhost) caso necessário
+        if (photoUrl.includes('localhost')) {
+            photoUrl = photoUrl.replace('localhost', window.location.host);
+        }
+
+        html += `
             <div class="seller-card">
-                <img src="${photoUrl}" alt="${seller.name}" class="seller-photo">
+                <img src="${photoUrl}" alt="${seller.name}" class="seller-photo" onerror="this.src='assets/default-avatar.png'">
                 <h6>${seller.name}</h6>
                 <div class="seller-stats">
                     <div class="stat-item">
@@ -894,27 +903,28 @@ function renderSellerCards(sellers) {
         `;
     });
 
-    if (sellers.length === 0) {
-        container.innerHTML = '<p>Nenhum vendedor encontrado para os filtros selecionados.</p>';
-    }
+    container.innerHTML = html;
 }
 
 // Busca os dados da API e renderiza os cards
 async function fetchAndRenderSellerCards() {
     try {
-        const ano = document.getElementById('filtroAno').value;
-        const mes = document.getElementById('filtroMes').value;
-        const unidade = document.getElementById('filtroUnidade').value;
-        const vendedor = document.getElementById('filtroVendedor').value;
-        const situacao = document.getElementById('filtroSituacao').value;
+        const filtros = {
+            ano: document.getElementById('filtroAno').value,
+            mes: document.getElementById('filtroMes').value,
+            unidade: document.getElementById('filtroUnidade').value,
+            vendedor: document.getElementById('filtroVendedor').value,
+            situacao: document.getElementById('filtroSituacao').value
+        };
 
-        const query = new URLSearchParams({ ano, mes, unidade, vendedor, situacao }).toString();
-
+        const query = new URLSearchParams(filtros).toString();
         const response = await fetch(`/api/kpi-vendas?${query}`);
         const data = await response.json();
 
         // Garante array
         const sellers = Array.isArray(data.sellerPerformance) ? data.sellerPerformance : [];
+        console.log('API Vendedores:', sellers);
+
         renderSellerCards(sellers);
 
     } catch (error) {
@@ -927,6 +937,12 @@ async function fetchAndRenderSellerCards() {
 document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderSellerCards();
 });
+
+// Atualiza os cards ao mudar os filtros
+document.querySelectorAll('#filtroAno, #filtroMes, #filtroUnidade, #filtroVendedor, #filtroSituacao')
+    .forEach(el => el.addEventListener('change', fetchAndRenderSellerCards));
+
+
 
 
 //Grafico de vendas por vendedor
@@ -1153,7 +1169,6 @@ document.querySelectorAll('#filtroAno, #filtroMes, #filtroUnidade, #filtroVended
 
 
 // Renderiza gráfico de vendas por unidade
-
 document.addEventListener('DOMContentLoaded', function() {
     // Referência global para o gráfico
     let salesByUnitChart;
@@ -1270,25 +1285,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chama a função pela primeira vez para carregar o gráfico inicial
     updateChartWithFilters();
 });
-
-// ... E no final do seu código JS, adicione a chamada com os filtros
-document.querySelectorAll('#filtroAno, #filtroMes, #filtroUnidade, #filtroVendedor, #filtroSituacao')
-    .forEach(el => el.addEventListener('change', () => {
-        const filtrosAtualizados = {
-            ano: document.getElementById('filtroAno').value,
-            mes: document.getElementById('filtroMes').value,
-            // unidade: O filtro de unidade não se aplica a este gráfico,
-            // que já exibe os dados por unidade
-            vendedor: document.getElementById('filtroVendedor').value,
-            situacao: document.getElementById('filtroSituacao').value
-        };
-        fetchSalesByUnitChart(filtrosAtualizados);
-    }));
-
-document.addEventListener('DOMContentLoaded', () => {
-    fetchSalesByUnitChart();
-});
-
 
 // Variável global do gráfico
 
@@ -1701,4 +1697,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-      
+         
