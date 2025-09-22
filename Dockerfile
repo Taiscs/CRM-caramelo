@@ -16,9 +16,11 @@ WORKDIR /var/www
 COPY . .
 
 # Garante que storage e bootstrap/cache existam e tenham permissões corretas
-RUN mkdir -p storage framework/cache bootstrap/cache \
+RUN mkdir -p storage/framework/{sessions,views,cache} bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+   
+
 
 # Instala dependências do PHP via Composer
 RUN composer install --no-dev --optimize-autoloader
