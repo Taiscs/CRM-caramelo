@@ -639,6 +639,8 @@ anoFiltro.addEventListener('change', () => {
 
 
 // 2. Gráfico de Leads por Fonte (Rosca - Donut)
+
+ window.leadsApiUrl = "{{ url('api/leads-por-fonte') }}";
 const leadsSourceChart = document.getElementById('leadsSourceChart');
 const leadsLoading = document.getElementById('leadsLoading');
 
@@ -649,6 +651,7 @@ async function fetchLeadsData() {
     leadsSourceChart.style.display = 'none';
 
     try {
+        // Usa a URL definida no Blade
         const response = await fetch(window.leadsApiUrl);
 
         if (!response.ok) {
@@ -660,7 +663,7 @@ async function fetchLeadsData() {
         const labels = rawData.map(item => item.fonte);
         const data = rawData.map(item => item.total);
 
-        // Definindo cores fixas para não depender do CSS
+        // Cores fixas para o gráfico
         const backgroundColors = [
             '#FF6384', // pink
             '#36A2EB', // blue
@@ -693,9 +696,7 @@ async function fetchLeadsData() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'bottom',
-                    }
+                    legend: { position: 'bottom' }
                 }
             }
         });
