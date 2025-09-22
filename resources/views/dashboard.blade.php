@@ -440,22 +440,25 @@
     </div>
 </div>
 
-            
-            <div class="col-lg-3">
-                <div class="card-section">
-                    <h4>Leads por Fonte</h4>
-                    <p>{{ url('api/leads-por-fonte') }}</p>
 
-                    <!-- Indicador de carregamento para o gráfico de Leads -->
-                    <div id="leadsLoading" class="loading-spinner">
-                        <div class="spinner-border" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p>Carregando dados...</p>
+
+
+        <div class="col-lg-3">
+            <div class="card-section">
+                <h4>Leads por Fonte</h4>
+                <!-- Indicador de carregamento para o gráfico de Leads -->
+                <div id="leadsLoading" class="loading-spinner" style="display:none; justify-content:center; align-items:center; flex-direction:column;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <canvas id="leadsSourceChart"></canvas>
+                    <p>Carregando dados...</p>
                 </div>
+                <canvas id="leadsSourceChart" style="min-height:250px;"></canvas>
             </div>
+        </div>
+    
+  
+     
             <div class="col-lg-3">
                 <div class="card-section">
                     <h4>Funil de Vendas</h4>
@@ -643,18 +646,25 @@ anoFiltro.addEventListener('change', () => {
 // 2. Gráfico de Leads por Fonte (Rosca - Donut)
 
     // Define a URL da API usando Blade
+       // Define a URL da API usando Blade (isso roda no servidor na geração do HTML)
     window.leadsApiUrl = "{{ url('api/leads-por-fonte') }}";
 
+    // Pega os elementos
     const leadsSourceChart = document.getElementById('leadsSourceChart');
     const leadsLoading = document.getElementById('leadsLoading');
 
     async function fetchLeadsData() {
-        if (!leadsSourceChart || !leadsLoading) return;
+        if (!leadsSourceChart || !leadsLoading) {
+            console.error("Elementos do gráfico ou loading não encontrados");
+            return;
+        }
 
+        // Mostrar carregando
         leadsLoading.style.display = 'flex';
         leadsSourceChart.style.display = 'none';
 
         try {
+            // Fetch da API usando a URL definida
             const response = await fetch(window.leadsApiUrl);
 
             if (!response.ok) {
@@ -662,37 +672,53 @@ anoFiltro.addEventListener('change', () => {
             }
 
             const rawData = await response.json();
+            // rawData deve ser algo como: [{"fonte":"Facebook","total":1}, ...]
+            
             const labels = rawData.map(item => item.fonte);
             const data = rawData.map(item => item.total);
 
-            const backgroundColors = ['#FF6384','#36A2EB','#8A2BE2','#FFD700','#FF4500','#4682B4'];
+            // Cores fixas
+            const backgroundColors = [
+                '#FF6384',
+                '#36A2EB',
+                '#8A2BE2',
+                '#FFD700',
+                '#FF4500',
+                '#4682B4'
+            ];
 
             const chartData = {
-                labels,
+                labels: labels,
                 datasets: [{
-                    data,
+                    data: data,
                     backgroundColor: backgroundColors.slice(0, labels.length),
                     hoverOffset: 10
                 }]
             };
 
-            const ctx = leadsSourceChart.getContext('2d');
+            const leadsCtx = leadsSourceChart.getContext('2d');
 
-            if (window.leadsChartInstance) window.leadsChartInstance.destroy();
+            // Se já existir gráfico criado, destrói antes de novo
+            if (window.leadsChartInstance) {
+                window.leadsChartInstance.destroy();
+            }
 
-            window.leadsChartInstance = new Chart(ctx, {
+            window.leadsChartInstance = new Chart(leadsCtx, {
                 type: 'doughnut',
                 data: chartData,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' }
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
             });
 
             leadsSourceChart.style.display = 'block';
+
         } catch (error) {
             console.error("Erro ao buscar os dados do gráfico:", error);
         } finally {
