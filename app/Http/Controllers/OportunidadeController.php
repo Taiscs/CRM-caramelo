@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class OportunidadeController extends Controller
 {
+    // Página principal do Kanban
     public function index()
     {
         // "Potencial de Ganho" (Reengajamento em 3 meses)
@@ -123,7 +124,7 @@ class OportunidadeController extends Controller
 
         $oportunidadesPersonalizadas = DB::select($sqlOportunidadesPersonalizadas);
 
-        // Inicializamos o Kanban
+        // Inicializa o Kanban
         $kanban = [
             'Oportunidades personalizadas' => $oportunidadesPersonalizadas,
             'Oportunidades mundo balada' => $oportunidadesBalada,
@@ -134,7 +135,7 @@ class OportunidadeController extends Controller
             'Fechado - Perdido' => [],
         ];
 
-        // Populamos o Kanban com os resultados
+        // Popula o Kanban com os resultados de Potencial de Ganho
         foreach ($oportunidadesPotencialGanho as $oportunidade) {
             $status = $oportunidade->situacao ?? 'Potencial de Ganho';
             if (array_key_exists($status, $kanban)) {
@@ -167,7 +168,6 @@ class OportunidadeController extends Controller
     }
 
     // ====== FILTROS ======
-
     public function getVendedores()
     {
         $vendedores = DB::table('consultor_comercial')
@@ -206,5 +206,53 @@ class OportunidadeController extends Controller
             ->get();
 
         return response()->json($unidades);
+    }
+
+    // ====== OPORTUNIDADES FILTRADAS ======
+    public function oportunidadesFiltradas(Request $request)
+    {
+        $query = DB::table('vendas as v')
+            ->join('clientes as c', 'v.cliente_id', '=', 'c.id')
+            ->join('consultor_comercial as cc', 'v.vendedor_id', '=', 'cc.id')
+            ->select(
+                'v.id',
+                'v.cliente_id',
+                'v.evento',
+                'v.total',
+                'v.situacao',
+                'c.Nome as cliente_nome',
+                'c.Email',
+                'c.Telefone',
+                'cc.nome_consultor as vendedor_nome',
+                'cc.foto as foto_vendedor',
+                'v.data_evento'
+            );
+
+        if ($request->filled('analyst')) {
+            $query->where('v.vendedor_id', $request->analyst);
+        }
+
+        if ($request->filled('month')) {
+            $query->whereMonth('v.data_evento', $request->month);
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('v.data_evento', $request->year);
+        }
+
+        if ($request->filled('unit')) {
+            $query->where('v.unidade_id', $request->unit);
+        }
+
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('c.Nome', 'like', '%' . $request->search . '%')
+                  ->orWhere('v.evento', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $oportunidades = $query->get();
+
+        return response()->json($oportunidades);
     }
 }
