@@ -522,216 +522,154 @@
       
 
         // Retorna o ícone correto para cada filtro
-function getIconForFilter(filterId) {
-    if (filterId === 'dropdownAnalystFilter') return 'fas fa-user-tie';
-    if (filterId === 'dropdownMonthFilter') return 'fas fa-calendar-alt';
-    if (filterId === 'dropdownYearFilter') return 'fas fa-calendar-check';
-    if (filterId === 'dropdownUnitFilter') return 'fas fa-building';
-    return ''; // ícone padrão vazio
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Função para retornar o ícone correto para cada filtro ---
+    function getIconForFilter(filterId) {
+        if (filterId === 'dropdownAnalystFilter') return 'fas fa-user-tie';
+        if (filterId === 'dropdownMonthFilter') return 'fas fa-calendar-alt';
+        if (filterId === 'dropdownYearFilter') return 'fas fa-calendar-check';
+        if (filterId === 'dropdownUnitFilter') return 'fas fa-building';
+        return ''; // ícone padrão vazio
+    }
 
-        // Função para popular um dropdown dinamicamente
-        async function populateDropdown(dropdownId, apiUrl, valueKey, textKey, initialText = 'Todos') {
-            const dropdownMenu = document.querySelector(`#${dropdownId} + .dropdown-menu`);
-            if (!dropdownMenu) {
-                console.warn(`Menu dropdown não encontrado para o ID: ${dropdownId}`);
-                return;
-            }
-            dropdownMenu.innerHTML = ''; // Limpa os itens existentes
+    // --- Função para popular um dropdown dinamicamente ---
+    async function populateDropdown(dropdownId, apiUrl, valueKey, textKey, initialText = 'Todos') {
+        const dropdownMenu = document.querySelector(`#${dropdownId}`).parentElement.querySelector('.dropdown-menu');
 
-            // Adiciona a opção "Todos"
-            const allItem = document.createElement('li');
-            const allLink = document.createElement('a');
-            allLink.classList.add('dropdown-item');
-            allLink.href = '#';
-            allLink.dataset.value = ''; // Valor vazio para 'Todos'
-            allLink.textContent = initialText;
-            allItem.appendChild(allLink);
-            dropdownMenu.appendChild(allItem);
+        if (!dropdownMenu) {
+            console.warn(`Menu dropdown não encontrado para o ID: ${dropdownId}`);
+            return;
+        }
+        dropdownMenu.innerHTML = '';
 
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
+        const allItem = document.createElement('li');
+        const allLink = document.createElement('a');
+        allLink.classList.add('dropdown-item');
+        allLink.href = '#';
+        allLink.dataset.value = '';
+        allLink.textContent = initialText;
+        allItem.appendChild(allLink);
+        dropdownMenu.appendChild(allItem);
 
-                data.forEach(item => {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.classList.add('dropdown-item');
-                    a.href = '#';
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
 
-                    if (typeof item === 'object' && item !== null) { // Para Unidades e Vendedores (objetos)
-                        a.dataset.value = item[valueKey];
-                        a.textContent = item[textKey];
-                    } else { // Para Meses e Anos (valores simples - o `item` é o próprio valor)
-                        a.dataset.value = item;
-                        a.textContent = item;
-                        // Se for mês, formata o nome do mês
-                        if (dropdownId === 'dropdownMonthFilter') {
-                            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-                            a.textContent = monthNames[parseInt(item) - 1]; // Garante que item é um número
-                        }
-                    }
-                    li.appendChild(a);
-                    dropdownMenu.appendChild(li);
-                });
-            } catch (error) {
-                console.error(`Erro ao carregar dados para ${dropdownId} da URL ${apiUrl}:`, error);
+            data.forEach(item => {
                 const li = document.createElement('li');
-                const a = document.createElement('a'); // <--- CORREÇÃO AQUI
-                a.classList.add('dropdown-item', 'disabled'); 
-                a.textContent = 'Erro ao carregar';
+                const a = document.createElement('a');
+                a.classList.add('dropdown-item');
+                a.href = '#';
+
+                if (typeof item === 'object' && item !== null) {
+                    a.dataset.value = item[valueKey];
+                    a.textContent = item[textKey];
+                } else {
+                    a.dataset.value = item;
+                    a.textContent = item;
+                    if (dropdownId === 'dropdownMonthFilter') {
+                        const monthNames = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+                            "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+                        a.textContent = monthNames[parseInt(item)-1];
+                    }
+                }
+
                 li.appendChild(a);
                 dropdownMenu.appendChild(li);
-            }
+            });
+        } catch (error) {
+            console.error(`Erro ao carregar dados para ${dropdownId}:`, error);
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.classList.add('dropdown-item', 'disabled');
+            a.textContent = 'Erro ao carregar';
+            li.appendChild(a);
+            dropdownMenu.appendChild(li);
+        }
+    }
+
+    // --- Função principal para aplicar filtros ---
+    async function applyFilters(filterId = null, filterValue = null) {
+        document.querySelectorAll('.dropdown .dropdown-toggle').forEach(button => {
+            if (!button.dataset.selectedValue) button.dataset.selectedValue = '';
+        });
+
+        const currentFilters = {
+            analyst: document.querySelector('#dropdownAnalystFilter .dropdown-toggle').dataset.selectedValue || '',
+            month: document.querySelector('#dropdownMonthFilter .dropdown-toggle').dataset.selectedValue || '',
+            year: document.querySelector('#dropdownYearFilter .dropdown-toggle').dataset.selectedValue || '',
+            unit: document.querySelector('#dropdownUnitFilter .dropdown-toggle').dataset.selectedValue || '',
+            search: document.querySelector('.toolbar input[type="text"]')?.value || ''
+        };
+
+        if (filterId && filterValue !== null) {
+            if (filterId === 'dropdownAnalystFilter') currentFilters.analyst = filterValue;
+            else if (filterId === 'dropdownMonthFilter') currentFilters.month = filterValue;
+            else if (filterId === 'dropdownYearFilter') currentFilters.year = filterValue;
+            else if (filterId === 'dropdownUnitFilter') currentFilters.unit = filterValue;
+            else if (filterId === 'search') currentFilters.search = filterValue;
+
+            const dropdownButton = document.querySelector(`#${filterId} .dropdown-toggle`);
+            if (dropdownButton) dropdownButton.dataset.selectedValue = filterValue;
         }
 
-        // Retorna o ícone correto para cada tipo de filtro
-  // Função principal para aplicar os filtros no Kanban
-async function applyFilters(filterId, filterValue) {
-    // Inicializa dataset.selectedValue se não existir
-    document.querySelectorAll('.dropdown .dropdown-toggle').forEach(button => {
-        if (!button.dataset.selectedValue) button.dataset.selectedValue = '';
+        console.log("Enviando filtros para API:", currentFilters);
+
+        try {
+            const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+
+            renderKanbanCards(data);
+        } catch (error) {
+            console.error('Erro ao aplicar filtros:', error);
+        }
+    }
+
+    // --- Inicializa dropdowns ---
+    async function populateDropdownsInitial() {
+        await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/filtros/vendedores','vendedor_id','vendedor','Todos os Analistas');
+        await populateDropdown('dropdownMonthFilter', 'https://crm-caramelo.onrender.com/api/meses-vendas','mes','mes','Todos os Meses');
+        await populateDropdown('dropdownYearFilter', 'https://crm-caramelo.onrender.com/api/filtros/anos','ano','ano','Todos os Anos');
+        await populateDropdown('dropdownUnitFilter', 'https://crm-caramelo.onrender.com/api/filtros/unidades','ID','NOME','Todas as Unidades');
+    }
+
+    // --- Event Listeners ---
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.addEventListener('click', function(event) {
+            const target = event.target;
+            if (target.classList.contains('dropdown-item')) {
+                event.preventDefault();
+                const dropdown = this.closest('.dropdown');
+                const dropdownButton = dropdown.querySelector('.dropdown-toggle');
+                const filterId = dropdown.id;
+                const filterValue = target.dataset.value || '';
+                const filterText = target.textContent;
+
+                dropdownButton.innerHTML = `<i class="${getIconForFilter(filterId)} me-2"></i> ${filterText}`;
+
+                applyFilters(filterId, filterValue);
+            }
+        });
     });
 
-    const currentFilters = {
-        analyst: document.querySelector('#dropdownAnalystFilter .dropdown-toggle').dataset.selectedValue || '',
-        month: document.querySelector('#dropdownMonthFilter .dropdown-toggle').dataset.selectedValue || '',
-        year: document.querySelector('#dropdownYearFilter .dropdown-toggle').dataset.selectedValue || '',
-        unit: document.querySelector('#dropdownUnitFilter .dropdown-toggle').dataset.selectedValue || '',
-        search: document.querySelector('.toolbar input[type="text"]').value || ''
-    };
+    const searchInput = document.querySelector('.toolbar input[type="text"]');
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            applyFilters('search', this.value);
+        }, 500);
+    });
 
-    // Atualiza o filtro que acabou de ser clicado
-    if (filterId === 'dropdownAnalystFilter') currentFilters.analyst = filterValue;
-    else if (filterId === 'dropdownMonthFilter') currentFilters.month = filterValue;
-    else if (filterId === 'dropdownYearFilter') currentFilters.year = filterValue;
-    else if (filterId === 'dropdownUnitFilter') currentFilters.unit = filterValue;
-    else if (filterId === 'search') currentFilters.search = filterValue;
+    document.querySelectorAll('.dropdown .dropdown-toggle').forEach(button => {
+        button.dataset.selectedValue = '';
+    });
 
-    // Armazena no botão
-    const dropdownButton = document.querySelector(`#${filterId} .dropdown-toggle`);
-    if (dropdownButton) dropdownButton.dataset.selectedValue = filterValue;
+    populateDropdownsInitial();
+});
 
-    console.log("Enviando filtros para API:", currentFilters);
-
-    try {
-        const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-
-        // Função para renderizar os cards novamente
-        renderKanbanCards(data);
-
-    } catch (error) {
-        console.error('Erro ao aplicar filtros:', error);
-    }
-}
-
-
-        // Função principal para aplicar os filtros no Kanban
-         async function applyFilters(filterId, filterValue) {
-            const currentFilters = {
-                analyst: document.getElementById('dropdownAnalystFilter')?.value || '',
-                month: document.getElementById('dropdownMonthFilter')?.value || '',
-                year: document.getElementById('dropdownYearFilter')?.value || '',
-                unit: document.getElementById('dropdownUnitFilter')?.value || '',
-                search: document.querySelector('.toolbar input[type="text"]')?.value || ''
-            };
-
-    console.log("Enviando filtros para API:", currentFilters);
-
-    try {
-        const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
-        const data = await response.json();
-
-        // aqui você teria que recriar os cards com base no retorno
-        renderKanbanCards(data);
-
-    } catch (error) {
-        console.error('Erro ao aplicar filtros:', error);
-    }
-}
-
-// Função para inicializar todos os dropdowns com dados
-async function populateDropdownsInitial() {
-    // Analista/Vendedor
-    await populateDropdown(
-        'dropdownAnalystFilter',
-        'https://crm-caramelo.onrender.com/api/filtros/vendedores',
-        'vendedor_id',
-        'vendedor',
-        'Todos os Analistas'
-    );
-
-    // Mês
-    await populateDropdown(
-        'dropdownMonthFilter',
-        'https://crm-caramelo.onrender.com/api/meses-vendas',
-        'mes',
-        'mes',
-        'Todos os Meses'
-    );
-
-    // Ano
-    await populateDropdown(
-        'dropdownYearFilter',
-        'https://crm-caramelo.onrender.com/api/filtros/anos',
-        'ano',
-        'ano',
-        'Todos os Anos'
-    );
-
-    // Unidade
-    await populateDropdown(
-        'dropdownUnitFilter',
-        'https://crm-caramelo.onrender.com/api/filtros/unidades',
-        'ID',
-        'NOME',
-        'Todas as Unidades'
-    );
-}
-
-        // --- Event Listeners e Inicialização ---
-
-        // Configura o evento de clique para todos os itens de dropdown
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.addEventListener('click', function(event) {
-                const target = event.target;
-                if (target.classList.contains('dropdown-item')) {
-                    event.preventDefault(); // Evita que a página recarregue
-                    const dropdownButton = this.closest('.dropdown').querySelector('.dropdown-toggle');
-                    const filterId = this.closest('.dropdown').id;
-                    const filterValue = target.dataset.value || '';
-                    const filterText = target.textContent;
-
-                    // Atualiza o texto do botão do dropdown
-                    dropdownButton.innerHTML = `<i class="${getIconForFilter(filterId)} me-2"></i> ${filterText}`;
-
-                    applyFilters(filterId, filterValue);
-                }
-            });
-        });
-
-        // Lógica para o campo de pesquisa (input de texto)
-        const searchInput = document.querySelector('.toolbar input[type="text"]');
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                applyFilters('search', this.value); // Chame applyFilters para a pesquisa
-            }, 500); // Atraso de 500ms para evitar muitas requisições
-        });
-
-        // Inicializa os 'dataset.selectedValue' nos botões do dropdown
-        document.querySelectorAll('.dropdown .dropdown-toggle').forEach(button => {
-            button.dataset.selectedValue = '';
-        });
-
-        // Chama a função para popular os dropdowns no carregamento da página
-        populateDropdownsInitial();
 
         // SEU CÓDIGO JS EXISTENTE PARA O MODAL (se estiver depois desta tag script)
         // document.addEventListener('DOMContentLoaded', function () { ... });
