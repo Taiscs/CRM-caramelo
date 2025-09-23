@@ -382,230 +382,111 @@
             </ul>
         </div>
     </div>
+<div class="kanban-board">
 
-    <div class="kanban-board">
-        <div class="kanban-column" id="column-qualificacao">
-            <div class="kanban-column-header">
-                <h5>Qualificação</h5>
-                <div>
-                    <span class="count" id="count-qualificacao">3</span>
-                    <span class="total-value" id="value-qualificacao">R$ 15.000</span>
-                </div>
-            </div>
-            <div class="kanban-cards">
-                <div class="kanban-card" data-id="opp1" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Aniversário de 5 Anos - Tema Princesas</h6>
-                    <div class="client-name">Cliente: Sra. Lima (Mãe da Alice)</div>
-                    <div class="value-date">
-                        <span class="value">R$ 5.000</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 20/Set</span>
-                    </div>
-                    <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Ana Paula">
-                        Graça Dias
-                    </div>
-                </div>
-                <div class="kanban-card" data-id="opp2" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Festa Teen - Balada Neon</h6>
-                    <div class="client-name">Cliente: Sr. e Sra. Souza (Pais do Lucas)</div>
-                    <div class="value-date">
-                        <span class="value">R$ 7.500</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 25/Out</span>
-                    </div>
-                    <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Yasminie">
-                        Yasminie
-                    </div>
-                </div>
-                <div class="kanban-card" data-id="opp3" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Chá Revelação - Safari</h6>
-                    <div class="client-name">Cliente: Casal Oliveira</div>
-                    <div class="value-date">
-                        <span class="value">R$ 2.500</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 01/Nov</span>
-                    </div>
-                    <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Larissa">
-                        Larissa
-                    </div>
-                </div>
+    {{-- Coluna de Oportunidades mundo balada --}}
+    <div class="kanban-column" id="column-oportunidades-balada">
+        <div class="kanban-column-header">
+            <h5>Oportunidades mundo balada</h5>
+            <div>
+                <span class="count" id="count-oportunidades-balada">{{ count($kanban['Oportunidades mundo balada']) }}</span>
+                <span class="total-value" id="value-oportunidades-balada">
+                    R$ {{ number_format(collect($kanban['Oportunidades mundo balada'])->sum('total'), 2, ',', '.') }}
+                </span>
             </div>
         </div>
-
-        <div class="kanban-column" id="column-proposta">
-            <div class="kanban-column-header">
-                <h5>Proposta Enviada</h5>
-                <div>
-                    <span class="count" id="count-proposta">2</span>
-                    <span class="total-value" id="value-proposta">R$ 22.000</span>
-                </div>
-            </div>
-            <div class="kanban-cards">
-                <div class="kanban-card" data-id="opp4" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Festa de 15 Anos - Baile de Máscaras</h6>
-                    <div class="client-name">Cliente: Sra. Costa (Mãe da Sofia)</div>
+        <div class="kanban-cards">
+            @foreach ($kanban['Oportunidades mundo balada'] as $oportunidade)
+               <div class="kanban-card open-client-modal" data-id="opp{{ $oportunidade->id }}" data-cliente-id="{{ $oportunidade->cliente_id }}">
+                    <h6>{{ $oportunidade->evento }}</h6>
+                    <div class="client-name">Cliente: {{ $oportunidade->cliente_nome }}</div>
                     <div class="value-date">
-                        <span class="value">R$ 15.000</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 15/Ago</span>
+                        <span class="value">R$ {{ number_format($oportunidade->total, 2, ',', '.') }}</span>
+                        <span class="due-date">
+                            <i class="far fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::parse($oportunidade->data_ultima_festa)->format('d/M') }}
+                        </span>
                     </div>
+                    <p>Próximo Aniversário: {{ \Carbon\Carbon::parse($oportunidade->proximo_aniversario)->format('d/m/Y') }}</p>
+                    <p>Idade: {{ $oportunidade->idade_proximo_aniversario }} anos</p>
                     <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Laiz">
-                        Laiz
+                        <img src="{{ $oportunidade->foto_vendedor }}" alt="{{ $oportunidade->vendedor_nome }}">
+                        {{ $oportunidade->vendedor_nome }}
                     </div>
                 </div>
-                <div class="kanban-card" data-id="opp5" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Aniversário de 7 Anos - Super-Heróis</h6>
-                    <div class="client-name">Cliente: Sr. Pedro (Pai do Bruno)</div>
-                    <div class="value-date">
-                        <span class="value">R$ 7.000</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 10/Set</span>
-                    </div>
-                    <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Ana Paula">
-                        Graça Dias
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
+    </div>
 
-        <div class="kanban-column" id="column-negociacao">
-            <div class="kanban-column-header">
-                <h5>Negociação</h5>
-                <div>
-                    <span class="count" id="count-negociacao">1</span>
-                    <span class="total-value" id="value-negociacao">R$ 10.000</span>
-                </div>
-            </div>
-            <div class="kanban-cards">
-                <div class="kanban-card" data-id="opp6" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Festa de Formatura Infantil - Pequenos Doutores</h6>
-                    <div class="client-name">Cliente: Escola Mundo Feliz</div>
-                    <div class="value-date">
-                        <span class="value">R$ 10.000</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 05/Ago</span>
-                    </div>
-                    <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Yasminie">
-                        Yasminie
-                    </div>
-                </div>
-            </div>
+  {{-- Coluna de Potencial de Ganho --}}
+<div class="kanban-column" id="column-potencial-ganho">
+    <div class="kanban-column-header">
+        <h5>Potencial de Ganho</h5>
+        <div>
+            <span class="count" id="count-potencial-ganho">{{ count($kanban['Potencial de Ganho']) }}</span>
+            <span class="total-value" id="value-potencial-ganho">
+                R$ {{ number_format(collect($kanban['Potencial de Ganho'])->sum('total'), 2, ',', '.') }}
+            </span>
         </div>
-
-        <div class="kanban-column won" id="column-ganho">
-            <div class="kanban-column-header">
-                <h5>Fechado - Ganho</h5>
-                <div>
-                    <span class="count" id="count-ganho">1</span>
-                    <span class="total-value" id="value-ganho">R$ 8.000</span>
+    </div>
+    <div class="kanban-cards">
+        @foreach ($kanban['Potencial de Ganho'] as $oportunidade)
+            <div class="kanban-card open-client-modal" data-id="opp{{ $oportunidade->id }}" data-cliente-id="{{ $oportunidade->cliente_id }}">
+                <h6>{{ $oportunidade->evento }}</h6>
+                <div class="client-name">Cliente: {{ $oportunidade->cliente_nome }}</div>
+                <div class="value-date">
+                    <span class="value">R$ {{ number_format($oportunidade->total, 2, ',', '.') }}</span>
+                    <span class="due-date">
+                        <i class="far fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::parse($oportunidade->data_ultima_festa)->format('d/M') }}
+                    </span>
+                </div>
+                <p>Próximo Aniversário: {{ \Carbon\Carbon::parse($oportunidade->proximo_aniversario)->format('d/m/Y') }}</p>
+                <p>Idade: {{ $oportunidade->idade_proximo_aniversario }} anos</p>
+                <div class="analyst-info">
+                    <img src="{{ $oportunidade->foto_vendedor }}" alt="{{ $oportunidade->vendedor_nome }}">
+                    {{ $oportunidade->vendedor_nome }}
                 </div>
             </div>
-            <div class="kanban-cards">
-                <div class="kanban-card" data-id="opp7" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Aniversário de 10 Anos - Gamer Zone</h6>
-                    <div class="client-name">Cliente: Sra. Pereira (Mãe do Theo)</div>
+        @endforeach
+    </div>
+</div>
+        <div class="kanban-cards">
+            @foreach ($kanban['Oportunidades personalizadas'] as $oportunidade)
+                <div class="kanban-card open-client-modal" data-id="opp{{ $oportunidade->id }}" data-cliente-id="{{ $oportunidade->cliente_id }}">
+                    <h6>{{ $oportunidade->descricao_oportunidade }}</h6>
+                    <div class="client-name">Cliente: {{ $oportunidade->cliente_nome }}</div>
                     <div class="value-date">
-                        <span class="value">R$ 8.000</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 30/Jun</span>
+                        <span class="due-date">
+                            <i class="far fa-calendar-alt me-1"></i> Data: {{ \Carbon\Carbon::parse($oportunidade->data_oportunidade)->format('d/M/Y') }}
+                        </span>
                     </div>
+                    <p>Último Evento: {{ $oportunidade->ultimo_evento ?? 'N/A' }}</p>
                     <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Larissa">
-                        Larissa
+                        <img src="{{ $oportunidade->foto_vendedor }}" alt="{{ $oportunidade->vendedor_nome }}">
+                        {{ $oportunidade->vendedor_nome }}
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="kanban-column lost" id="column-perdido">
-            <div class="kanban-column-header">
-                <h5>Fechado - Perdido</h5>
-                <div>
-                    <span class="count" id="count-perdido">1</span>
-                    <span class="total-value" id="value-perdido">R$ 3.000</span>
-                </div>
-            </div>
-            <div class="kanban-cards">
-                <div class="kanban-card" data-id="opp8" data-bs-toggle="modal" data-bs-target="#opportunityDetailModal">
-                    <h6>Aniversário de 3 Anos - Circo Mágico</h6>
-                    <div class="client-name">Cliente: Sra. Santos (Mãe da Clara)</div>
-                    <div class="value-date">
-                        <span class="value">R$ 3.000</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> 20/Jul</span>
-                    </div>
-                    <div class="analyst-info">
-                        <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Laiz">
-                        Laiz
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
     </div>
 </div>
+    
+    {{-- Você pode replicar a mesma estrutura para as outras colunas --}}
 
-<div class="modal fade" id="opportunityDetailModal" tabindex="-1" aria-labelledby="opportunityDetailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-lg">
-            <div class="modal-header">
-                <h5 class="modal-title" id="opportunityDetailModalLabel">Detalhes da Oportunidade: <span id="modalOpportunityName"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Informações Gerais</h6>
-                        <div class="info-item">
-                            <strong>Cliente:</strong> <span id="modalOpportunityClient"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Valor:</strong> <span id="modalOpportunityValue"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Estágio:</strong> <span id="modalOpportunityStage"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Atendente Responsável:</strong> <span id="modalOpportunityAnalyst"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Data Prevista do Evento:</strong> <span id="modalOpportunityDueDate"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Data de Criação:</strong> <span id="modalOpportunityCreated"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Pacote/Serviços Envolvidos</h6>
-                        <ul class="list-unstyled" id="modalOpportunityProducts">
-                            <li>- Pacote Festa Completa Kids</li>
-                            <li>- Decoração Temática "Reino Encantado"</li>
-                            <li>- Animação com Personagens</li>
-                            <li>- Mesa de Doces Personalizada</li>
-                        </ul>
-                        <h6 class="mt-4">Histórico de Contato</h6>
-                        <div id="modalOpportunityInteractions">
-                            <div class="history-item">
-                                <div class="date">05/Jul/2025 - 10:00</div>
-                                <div class="type">E-mail:</div>
-                                <div class="details"> Envio de proposta detalhada v2 (incluindo show de mágica).</div>
-                            </div>
-                            <div class="history-item">
-                                <div class="date">01/Jul/2025 - 15:00</div>
-                                <div class="type">Reunião:</div>
-                                <div class="details"> Apresentação inicial do espaço e pacotes.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <h6 class="mt-4">Notas da Oportunidade</h6>
-                <p id="modalOpportunityNotes">Cliente pediu inclusão de máquina de algodão doce e desconto de 5% no pacote. Avaliar viabilidade e contraproposta.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary"><i class="fas fa-pencil-alt me-2"></i>Editar</button>
-                <button type="button" class="btn btn-pink"><i class="fas fa-check-circle me-2"></i>Marcar como Fechada</button>
-                <button type="button" class="btn btn-danger"><i class="fas fa-times-circle me-2"></i>Marcar como Perdida</button>
-                <button type="button" class="btn btn-outline-primary"><i class="fas fa-calendar-alt me-2"></i>Agendar Visita</button>
-            </div>
+</div>
+<div class="modal fade" id="clientDetailModal" tabindex="-1" aria-labelledby="clientDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="clientDetailModalLabel">Detalhes do Cliente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Nome:</strong> <span id="clientName"></span></p>
+        <p><strong>Email:</strong> <span id="clientEmail"></span></p>
+        <p><strong>Telefone:</strong> <span id="clientPhone"></span></p>
         </div>
     </div>
+  </div>
 </div>
 
 <footer class="footer mt-auto py-3">
@@ -623,189 +504,49 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <script>
-    // Dados de exemplo (em um sistema real, viriam do seu backend)
-    const opportunitiesData = {
-        'opp1': {
-            name: 'Aniversário de 5 Anos - Tema Princesas',
-            client: 'Sra. Lima (Mãe da Alice)',
-            value: 'R$ 5.000,00',
-            stage: 'Qualificação',
-            analyst: 'Graça Dias',
-            dueDate: '20/Set/2025', // Data do evento
-            created: '08/Jul/2025',
-            products: ['Pacote Kids Essencial', 'Decoração Tema Princesas', 'Bolo Personalizado 2 Andares'],
-            notes: 'Mãe da Alice, muito animada com o tema. Pediu orçamento para show de mágica adicional.'
-        },
-        'opp2': {
-            name: 'Festa Teen - Balada Neon',
-            client: 'Sr. e Sra. Souza (Pais do Lucas)',
-            value: 'R$ 7.500,00',
-            stage: 'Qualificação',
-            analyst: 'Yasminie',
-            dueDate: '25/Out/2025',
-            created: '07/Jul/2025',
-            products: ['Pacote Teen Premium', 'Iluminação Especial', 'DJ com repertório personalizado'],
-            notes: 'Lucas quer algo moderno e com muita música. Pais preocupados com segurança.'
-        },
-        'opp3': {
-            name: 'Chá Revelação - Safari',
-            client: 'Casal Oliveira',
-            value: 'R$ 2.500,00',
-            stage: 'Qualificação',
-            analyst: 'Larissa',
-            dueDate: '01/Nov/2025',
-            created: '06/Jul/2025',
-            products: ['Pacote Chá Revelação', 'Decoração Safari', 'Bolo temático'],
-            notes: 'Primeiro filho do casal. Buscam algo íntimo e memorável.'
-        },
-        'opp4': {
-            name: 'Festa de 15 Anos - Baile de Máscaras',
-            client: 'Sra. Costa (Mãe da Sofia)',
-            value: 'R$ 15.000,00',
-            stage: 'Proposta Enviada',
-            analyst: 'Laiz',
-            dueDate: '15/Ago/2025',
-            created: '01/Jul/2025',
-            products: ['Pacote Debutante Exclusive', 'Decoração Luxo', 'Atrações Especiais'],
-            notes: 'Proposta enviada. Aguardando feedback sobre opções de buffet.'
-        },
-        'opp5': {
-            name: 'Aniversário de 7 Anos - Super-Heróis',
-            client: 'Sr. Pedro (Pai do Bruno)',
-            value: 'R$ 7.000,00',
-            stage: 'Proposta Enviada',
-            analyst: 'Graça Dias',
-            dueDate: '10/Set/2025',
-            created: '28/Jun/2025',
-            products: ['Pacote Kids Deluxe', 'Decoração Super-Heróis', 'Oficinas interativas'],
-            notes: 'Proposta enviada. Cliente pediu para incluir lembrancinhas personalizadas.'
-        },
-        'opp6': {
-            name: 'Festa de Formatura Infantil - Pequenos Doutores',
-            client: 'Escola Mundo Feliz',
-            value: 'R$ 10.000,00',
-            stage: 'Negociação',
-            analyst: 'Yasminie',
-            dueDate: '05/Ago/2025',
-            created: '20/Jun/2025',
-            products: ['Pacote Formatura Kids', 'Cerimônia Simbólica', 'Fotos e Vídeo'],
-            notes: 'Escola buscando melhor preço para formatura de 3 turmas. Negociar desconto para volume.'
-        },
-        'opp7': {
-            name: 'Aniversário de 10 Anos - Gamer Zone',
-            client: 'Sra. Pereira (Mãe do Theo)',
-            value: 'R$ 8.000,00',
-            stage: 'Fechado - Ganho',
-            analyst: 'Larissa',
-            dueDate: '30/Jun/2025',
-            created: '15/Jun/2025',
-            products: ['Pacote Gamer', 'Estações de Jogos', 'Realidade Virtual'],
-            notes: 'Oportunidade fechada! Pagamento 50% adiantado.'
-        },
-        'opp8': {
-            name: 'Aniversário de 3 Anos - Circo Mágico',
-            client: 'Sra. Santos (Mãe da Clara)',
-            value: 'R$ 3.000,00',
-            stage: 'Fechado - Perdido',
-            analyst: 'Laiz',
-            dueDate: '20/Jul/2025',
-            created: '10/Jun/2025',
-            products: ['Pacote Circo Simples', 'Decoração Básica'],
-            notes: 'Cliente optou por outra empresa com preço mais baixo. Feedback: preço foi o fator decisivo.'
-        }
-    };
+    
+    
+   
+ 
 
-    // Inicialização do Sortable.js para cada coluna do Kanban
-    document.addEventListener('DOMContentLoaded', function() {
-        const columns = document.querySelectorAll('.kanban-cards');
-        columns.forEach(column => {
-            new Sortable(column, {
-                group: 'kanban', // Permite arrastar entre as colunas
-                animation: 150,
-                ghostClass: 'sortable-ghost', // Classe para o item sendo arrastado
-                onEnd: function (evt) {
-                    // Lógica para atualizar o backend quando um card é movido
-                    console.log('Oportunidade ' + evt.item.dataset.id + ' movida de ' + evt.from.parentNode.id + ' para ' + evt.to.parentNode.id);
-                    // Aqui você faria uma chamada AJAX para o seu PHP
-                    // para atualizar o estágio da oportunidade no banco de dados.
-                    updateColumnCountsAndValues(); // Atualiza os contadores
-                }
-            });
-        });
-
-        // Função para atualizar contadores e valores das colunas (Exemplo estático)
-        function updateColumnCountsAndValues() {
-            const stages = ['qualificacao', 'proposta', 'negociacao', 'ganho', 'perdido'];
-            stages.forEach(stage => {
-                const column = document.getElementById(`column-${stage}`);
-                if (column) {
-                    const cardsContainer = column.querySelector('.kanban-cards');
-                    const cards = cardsContainer.querySelectorAll('.kanban-card');
-                    const countSpan = column.querySelector(`#count-${stage}`);
-                    const valueSpan = column.querySelector(`#value-${stage}`);
-
-                    let totalValue = 0;
-                    cards.forEach(card => {
-                        const valueText = card.querySelector('.value').textContent.replace('R$ ', '').replace('.', '').replace(',', '.');
-                        totalValue += parseFloat(valueText);
-                    });
-
-                    countSpan.textContent = cards.length;
-                    valueSpan.textContent = 'R$ ' + totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                }
-            });
-        }
-
+    
         // Exemplo de como popular o modal de detalhes da oportunidade (em um cenário real, viria do PHP/AJAX)
-        const opportunityDetailModal = document.getElementById('opportunityDetailModal');
-        opportunityDetailModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget; // Botão/Card que disparou o modal
-            const opportunityId = button.dataset.id; // Pega o ID da oportunidade do atributo data-id
+    
+document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.open-client-modal');
+    const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
 
-            const opportunity = opportunitiesData[opportunityId];
+    cards.forEach(card => {
+        card.addEventListener('click', function () {
+            const clienteId = this.getAttribute('data-cliente-id');
 
-            if (opportunity) {
-                document.getElementById('modalOpportunityName').textContent = opportunity.name;
-                document.getElementById('modalOpportunityClient').textContent = opportunity.client;
-                document.getElementById('modalOpportunityValue').textContent = opportunity.value;
-                document.getElementById('modalOpportunityStage').textContent = opportunity.stage;
-                document.getElementById('modalOpportunityAnalyst').textContent = opportunity.analyst;
-                document.getElementById('modalOpportunityDueDate').textContent = opportunity.dueDate;
-                document.getElementById('modalOpportunityCreated').textContent = opportunity.created;
-                document.getElementById('modalOpportunityNotes').textContent = opportunity.notes;
+            if (clienteId) {
+                fetch(`/cliente/${clienteId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Cliente não encontrado');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('clientName').textContent = data.Nome;
+                        document.getElementById('clientEmail').textContent = data.Email;
+                        document.getElementById('clientPhone').textContent = data.Telefone;
 
-                const productsList = document.getElementById('modalOpportunityProducts');
-                productsList.innerHTML = '';
-                opportunity.products.forEach(product => {
-                    const li = document.createElement('li');
-                    li.textContent = `- ${product}`;
-                    productsList.appendChild(li);
-                });
 
-                // Você pode adicionar um histórico de interações aqui, se tiver nos dados.
-                // Exemplo:
-                // const interactionsContainer = document.getElementById('modalOpportunityInteractions');
-                // interactionsContainer.innerHTML = '';
-                // if (opportunity.interactions && opportunity.interactions.length > 0) {
-                //     opportunity.interactions.forEach(interaction => {
-                //         const item = document.createElement('div');
-                //         item.classList.add('history-item');
-                //         item.innerHTML = `
-                //             <div class="date">${interaction.date}</div>
-                //             <div class="type">${interaction.type}:</div>
-                //             <div class="details">${interaction.details}</div>
-                //         `;
-                //         interactionsContainer.appendChild(item);
-                //     });
-                // } else {
-                //     interactionsContainer.innerHTML = '<p class="text-muted">Nenhuma interação registrada.</p>';
-                // }
+
+
+                        
+                        // Adicione as outras propriedades que você retornou
+                        modal.show();
+                    })
+                    .catch(error => console.error('Erro ao buscar dados do cliente:', error));
             }
         });
-
-        // Chamar a função para inicializar os contadores e valores ao carregar a página
-        updateColumnCountsAndValues();
     });
+});
+        //updateColumnCountsAndValues();
+    
 </script>
 
 </body>
