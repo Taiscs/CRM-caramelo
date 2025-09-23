@@ -342,46 +342,54 @@
 </nav>
 
 <div class="container-fluid py-5">
-    <h2 class="mb-4 text-dark ps-2">Funil de Vendas</h2>
+<h2 class="mb-4 text-dark ps-2">Funil de Vendas</h2>
 
-    <div class="toolbar">
-        <input type="text" class="form-control" placeholder="Pesquisar oportunidade...">
-        <button type="button" class="btn btn-primary"><i class="fas fa-plus-circle me-2"></i>Criar Nova Oportunidade</button>
-        <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownAnalystFilter" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-user-tie me-2"></i>Analista
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownAnalystFilter">
-                <li><a class="dropdown-item" href="#">Todos</a></li>
-                <li><a class="dropdown-item" href="#">Graça Dias</a></li>
-                <li><a class="dropdown-item" href="#">Yasminie</a></li>
-                <li><a class="dropdown-item" href="#">Larissa</a></li>
-            </ul>
-        </div>
-        <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownStageFilter" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-filter me-2"></i>Estágio
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownStageFilter">
-                <li><a class="dropdown-item" href="#">Todos</a></li>
-                <li><a class="dropdown-item" href="#">Qualificação</a></li>
-                <li><a class="dropdown-item" href="#">Proposta Enviada</a></li>
-                <li><a class="dropdown-item" href="#">Negociação</a></li>
-                <li><a class="dropdown-item" href="#">Fechado - Ganho</a></li>
-                <li><a class="dropdown-item" href="#">Fechado - Perdido</a></li>
-            </ul>
-        </div>
-        <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownDateFilter" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-calendar-alt me-2"></i>Período
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownDateFilter">
-                <li><a class="dropdown-item" href="#">Mês Atual</a></li>
-                <li><a class="dropdown-item" href="#">Próximo Trimestre</a></li>
-                <li><a class="dropdown-item" href="#">Personalizado</a></li>
-            </ul>
-        </div>
+<div class="toolbar">
+    <input type="text" class="form-control" placeholder="Pesquisar oportunidade...">
+    <button type="button" class="btn btn-primary"><i class="fas fa-plus-circle me-2"></i>Criar Nova Oportunidade</button>
+    
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownAnalystFilter" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user-tie me-2"></i>Analista
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownAnalystFilter">
+            <li><a class="dropdown-item" href="#">Todos</a></li>
+            {{-- Esses serão populados via JS --}}
+        </ul>
     </div>
+
+    {{-- Dropdown para Mês --}}
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMonthFilter" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-calendar-alt me-2"></i>Mês
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMonthFilter">
+            {{-- Serão populados via JS --}}
+        </ul>
+    </div>
+
+    {{-- Dropdown para Ano --}}
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownYearFilter" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-calendar-check me-2"></i>Ano
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownYearFilter">
+            {{-- Serão populados via JS --}}
+        </ul>
+    </div>
+
+    {{-- Dropdown para Unidade --}}
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownUnitFilter" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-building me-2"></i>Unidade
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownUnitFilter">
+            {{-- Serão populados via JS --}}
+        </ul>
+    </div>
+</div>
+
+
 <div class="kanban-board">
 
     {{-- Coluna de Oportunidades mundo balada --}}
@@ -509,52 +517,204 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
 <script>
-    
-    
-   
- 
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Funções de Ajuda ---
 
-    
-        // Exemplo de como popular o modal de detalhes da oportunidade (em um cenário real, viria do PHP/AJAX)
-    
-document.addEventListener('DOMContentLoaded', function () {
-    const cards = document.querySelectorAll('.open-client-modal');
-    const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
-
-    cards.forEach(card => {
-        card.addEventListener('click', function () {
-            const clienteId = this.getAttribute('data-cliente-id');
-
-            if (clienteId) {
-                fetch(`/cliente/${clienteId}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Cliente não encontrado');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        document.getElementById('clientName').textContent = data.Nome;
-                        document.getElementById('clientEmail').textContent = data.Email;
-                        document.getElementById('clientPhone').textContent = data.Telefone;
-
-
-
-
-
-                        // Adicione as outras propriedades que você retornou
-                        modal.show();
-                    })
-                    .catch(error => console.error('Erro ao buscar dados do cliente:', error));
+        // Função para popular um dropdown dinamicamente
+        async function populateDropdown(dropdownId, apiUrl, valueKey, textKey, initialText = 'Todos') {
+            const dropdownMenu = document.querySelector(`#${dropdownId} + .dropdown-menu`);
+            if (!dropdownMenu) {
+                console.warn(`Menu dropdown não encontrado para o ID: ${dropdownId}`);
+                return;
             }
+            dropdownMenu.innerHTML = ''; // Limpa os itens existentes
+
+            // Adiciona a opção "Todos"
+            const allItem = document.createElement('li');
+            const allLink = document.createElement('a');
+            allLink.classList.add('dropdown-item');
+            allLink.href = '#';
+            allLink.dataset.value = ''; // Valor vazio para 'Todos'
+            allLink.textContent = initialText;
+            allItem.appendChild(allLink);
+            dropdownMenu.appendChild(allItem);
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.classList.add('dropdown-item');
+                    a.href = '#';
+
+                    if (typeof item === 'object' && item !== null) { // Para Unidades e Vendedores (objetos)
+                        a.dataset.value = item[valueKey];
+                        a.textContent = item[textKey];
+                    } else { // Para Meses e Anos (valores simples - o `item` é o próprio valor)
+                        a.dataset.value = item;
+                        a.textContent = item;
+                        // Se for mês, formata o nome do mês
+                        if (dropdownId === 'dropdownMonthFilter') {
+                            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                            a.textContent = monthNames[parseInt(item) - 1]; // Garante que item é um número
+                        }
+                    }
+                    li.appendChild(a);
+                    dropdownMenu.appendChild(li);
+                });
+            } catch (error) {
+                console.error(`Erro ao carregar dados para ${dropdownId} da URL ${apiUrl}:`, error);
+                const li = document.createElement('li');
+                const a = document.createElement('a'); // <--- CORREÇÃO AQUI
+                a.classList.add('dropdown-item', 'disabled'); 
+                a.textContent = 'Erro ao carregar';
+                li.appendChild(a);
+                dropdownMenu.appendChild(li);
+            }
+        }
+
+        // Retorna o ícone correto para cada tipo de filtro
+        function getIconForFilter(filterId) {
+            if (filterId === 'dropdownAnalystFilter') return 'fas fa-user-tie';
+            if (filterId === 'dropdownMonthFilter') return 'fas fa-calendar-alt';
+            if (filterId === 'dropdownYearFilter') return 'fas fa-calendar-check';
+            if (filterId === 'dropdownUnitFilter') return 'fas fa-building';
+            // Adicione outros ícones conforme necessário, por exemplo para dropdownStageFilter
+            // if (filterId === 'dropdownStageFilter') return 'fas fa-filter';
+            return ''; // Ícone padrão ou vazio
+        }
+
+        // Função principal para aplicar os filtros no Kanban
+        function applyFilters(filterId, filterValue) {
+            console.log(`Aplicando filtro: ${filterId} com valor ${filterValue}`);
+            
+            // Coleta os valores de todos os filtros
+            const currentFilters = {
+                analyst: document.querySelector('#dropdownAnalystFilter .dropdown-toggle').dataset.selectedValue || '',
+                month: document.querySelector('#dropdownMonthFilter .dropdown-toggle').dataset.selectedValue || '',
+                year: document.querySelector('#dropdownYearFilter .dropdown-toggle').dataset.selectedValue || '',
+                unit: document.querySelector('#dropdownUnitFilter .dropdown-toggle').dataset.selectedValue || '',
+                search: document.querySelector('.toolbar input[type="text"]').value || ''
+                // stage: document.querySelector('#dropdownStageFilter .dropdown-toggle').dataset.selectedValue || '', // Se você tiver filtro de estágio
+            };
+
+            // Atualiza o filtro que acabou de ser clicado ou pesquisado
+            if (filterId === 'dropdownAnalystFilter') currentFilters.analyst = filterValue;
+            else if (filterId === 'dropdownMonthFilter') currentFilters.month = filterValue;
+            else if (filterId === 'dropdownYearFilter') currentFilters.year = filterValue;
+            else if (filterId === 'dropdownUnitFilter') currentFilters.unit = filterValue;
+            // else if (filterId === 'dropdownStageFilter') currentFilters.stage = filterValue; // Se você tiver filtro de estágio
+            else if (filterId === 'search') currentFilters.search = filterValue;
+
+            // Armazena o valor selecionado no botão do dropdown (útil para saber o estado atual)
+            const dropdownToggle = document.querySelector(`#${filterId} .dropdown-toggle`);
+            if (dropdownToggle) {
+                dropdownToggle.dataset.selectedValue = filterValue;
+            }
+
+            console.log("Filtros atuais para enviar ao backend:", currentFilters);
+
+            // para obter os dados filtrados e renderizar o Kanban novamente.
+        }
+
+        // Função para inicializar todos os dropdowns com dados
+async function populateDropdownsInitial() {
+            // Analista/Vendedor
+            await populateDropdown('dropdownAnalystFilter', '/filtros/vendedores', 'vendedor_id', 'vendedor', 'Todos os Analistas');
+            
+            // Mês  <-- LINHA ALTERADA AQUI
+            await populateDropdown('dropdownMonthFilter', '/meses-vendas', 'mes', 'mes', 'Todos os Meses'); 
+            
+            // Ano
+            await populateDropdown('dropdownYearFilter', '/filtros/anos', 'ano', 'ano', 'Todos os Anos');
+            // Unidade
+            await populateDropdown('dropdownUnitFilter', '/filtros/unidades', 'ID', 'NOME', 'Todas as Unidades');
+        }
+        // --- Event Listeners e Inicialização ---
+
+        // Configura o evento de clique para todos os itens de dropdown
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.addEventListener('click', function(event) {
+                const target = event.target;
+                if (target.classList.contains('dropdown-item')) {
+                    event.preventDefault(); // Evita que a página recarregue
+                    const dropdownButton = this.closest('.dropdown').querySelector('.dropdown-toggle');
+                    const filterId = this.closest('.dropdown').id;
+                    const filterValue = target.dataset.value || '';
+                    const filterText = target.textContent;
+
+                    // Atualiza o texto do botão do dropdown
+                    dropdownButton.innerHTML = `<i class="${getIconForFilter(filterId)} me-2"></i> ${filterText}`;
+
+                    applyFilters(filterId, filterValue);
+                }
+            });
         });
+
+        // Lógica para o campo de pesquisa (input de texto)
+        const searchInput = document.querySelector('.toolbar input[type="text"]');
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                applyFilters('search', this.value); // Chame applyFilters para a pesquisa
+            }, 500); // Atraso de 500ms para evitar muitas requisições
+        });
+
+        // Inicializa os 'dataset.selectedValue' nos botões do dropdown
+        document.querySelectorAll('.dropdown .dropdown-toggle').forEach(button => {
+            button.dataset.selectedValue = '';
+        });
+
+        // Chama a função para popular os dropdowns no carregamento da página
+        populateDropdownsInitial();
+
+        // SEU CÓDIGO JS EXISTENTE PARA O MODAL (se estiver depois desta tag script)
+        // document.addEventListener('DOMContentLoaded', function () { ... });
+        // ATENÇÃO: Se o código do modal já está no DOMContentLoaded de um script anterior,
+        // você NÃO deve envolvê-lo em outro DOMContentLoaded aqui.
+        // Apenas as linhas que inicializam cards, modal, e o loop cards.forEach(...)
+        // devem estar aqui, se você estiver combinando scripts.
+        // POR EXEMPLO, se o script do modal está em um bloco `<script>` e este em outro:
+
+        // CÓDIGO DO MODAL (APENAS SE ESTIVER NO MESMO BLOCO DE SCRIPT)
+        const cards = document.querySelectorAll('.open-client-modal');
+        const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
+
+        cards.forEach(card => {
+            card.addEventListener('click', function () {
+                const clienteId = this.getAttribute('data-cliente-id');
+
+                if (clienteId) {
+                    fetch(`/cliente/${clienteId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Cliente não encontrado');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            document.getElementById('clientName').textContent = data.Nome;
+                            document.getElementById('clientEmail').textContent = data.Email;
+                            document.getElementById('clientPhone').textContent = data.Telefone;
+                            // Adicione as outras propriedades que você retornou
+                            modal.show();
+                        })
+                        .catch(error => console.error('Erro ao buscar dados do cliente:', error));
+                }
+            });
+        });
+        // FIM DO CÓDIGO DO MODAL
     });
-});
-        //updateColumnCountsAndValues();
-    
 </script>
+
+
 
 </body>
 </html>
