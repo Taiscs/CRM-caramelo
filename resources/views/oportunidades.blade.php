@@ -627,13 +627,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- Inicializa dropdowns ---
-    async function populateDropdownsInitial() {
-        await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/filtros/vendedores','vendedor_id','vendedor','Todos os Analistas');
-        await populateDropdown('dropdownMonthFilter', 'https://crm-caramelo.onrender.com/api/meses-vendas','mes','mes','Todos os Meses');
-        await populateDropdown('dropdownYearFilter', 'https://crm-caramelo.onrender.com/api/filtros/anos','ano','ano','Todos os Anos');
-        await populateDropdown('dropdownUnitFilter', 'https://crm-caramelo.onrender.com/api/filtros/unidades','ID','NOME','Todas as Unidades');
-    }
+ 
+ // --- Inicializa dropdowns ---
+async function populateDropdownsInitial() {
+    await populateDropdown(
+        'dropdownAnalystFilter',
+        'https://crm-caramelo.onrender.com/api/analistas',
+        'id', 'nome',
+        'Todos os Analistas'
+    );
+
+    await populateDropdown(
+        'dropdownMonthFilter',
+        'https://crm-caramelo.onrender.com/api/meses-vendas',
+        'mes', 'mes',
+        'Todos os Meses'
+    );
+
+    await populateDropdown(
+        'dropdownYearFilter',
+        'https://crm-caramelo.onrender.com/api/filtros/anos',
+        'ano', 'ano',
+        'Todos os Anos'
+    );
+
+    await populateDropdown(
+        'dropdownUnitFilter',
+        'https://crm-caramelo.onrender.com/api/filtros/unidades',
+        'id', 'nome',
+        'Todas as Unidades'
+    );
+}
+
 
     // --- Event Listeners ---
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
