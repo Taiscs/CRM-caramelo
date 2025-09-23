@@ -519,7 +519,16 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Funções de Ajuda ---
+      
+
+        // Retorna o ícone correto para cada filtro
+function getIconForFilter(filterId) {
+    if (filterId === 'dropdownAnalystFilter') return 'fas fa-user-tie';
+    if (filterId === 'dropdownMonthFilter') return 'fas fa-calendar-alt';
+    if (filterId === 'dropdownYearFilter') return 'fas fa-calendar-check';
+    if (filterId === 'dropdownUnitFilter') return 'fas fa-building';
+    return ''; // ícone padrão vazio
+}
 
         // Função para popular um dropdown dinamicamente
         async function populateDropdown(dropdownId, apiUrl, valueKey, textKey, initialText = 'Todos') {
@@ -580,62 +589,111 @@
         }
 
         // Retorna o ícone correto para cada tipo de filtro
-        function getIconForFilter(filterId) {
-            if (filterId === 'dropdownAnalystFilter') return 'fas fa-user-tie';
-            if (filterId === 'dropdownMonthFilter') return 'fas fa-calendar-alt';
-            if (filterId === 'dropdownYearFilter') return 'fas fa-calendar-check';
-            if (filterId === 'dropdownUnitFilter') return 'fas fa-building';
-            // Adicione outros ícones conforme necessário, por exemplo para dropdownStageFilter
-            // if (filterId === 'dropdownStageFilter') return 'fas fa-filter';
-            return ''; // Ícone padrão ou vazio
-        }
+  // Função principal para aplicar os filtros no Kanban
+async function applyFilters(filterId, filterValue) {
+    // Inicializa dataset.selectedValue se não existir
+    document.querySelectorAll('.dropdown .dropdown-toggle').forEach(button => {
+        if (!button.dataset.selectedValue) button.dataset.selectedValue = '';
+    });
+
+    const currentFilters = {
+        analyst: document.querySelector('#dropdownAnalystFilter .dropdown-toggle').dataset.selectedValue || '',
+        month: document.querySelector('#dropdownMonthFilter .dropdown-toggle').dataset.selectedValue || '',
+        year: document.querySelector('#dropdownYearFilter .dropdown-toggle').dataset.selectedValue || '',
+        unit: document.querySelector('#dropdownUnitFilter .dropdown-toggle').dataset.selectedValue || '',
+        search: document.querySelector('.toolbar input[type="text"]').value || ''
+    };
+
+    // Atualiza o filtro que acabou de ser clicado
+    if (filterId === 'dropdownAnalystFilter') currentFilters.analyst = filterValue;
+    else if (filterId === 'dropdownMonthFilter') currentFilters.month = filterValue;
+    else if (filterId === 'dropdownYearFilter') currentFilters.year = filterValue;
+    else if (filterId === 'dropdownUnitFilter') currentFilters.unit = filterValue;
+    else if (filterId === 'search') currentFilters.search = filterValue;
+
+    // Armazena no botão
+    const dropdownButton = document.querySelector(`#${filterId} .dropdown-toggle`);
+    if (dropdownButton) dropdownButton.dataset.selectedValue = filterValue;
+
+    console.log("Enviando filtros para API:", currentFilters);
+
+    try {
+        const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+
+        // Função para renderizar os cards novamente
+        renderKanbanCards(data);
+
+    } catch (error) {
+        console.error('Erro ao aplicar filtros:', error);
+    }
+}
+
 
         // Função principal para aplicar os filtros no Kanban
-        function applyFilters(filterId, filterValue) {
-            console.log(`Aplicando filtro: ${filterId} com valor ${filterValue}`);
-            
-            // Coleta os valores de todos os filtros
+         async function applyFilters(filterId, filterValue) {
             const currentFilters = {
-                analyst: document.querySelector('#dropdownAnalystFilter .dropdown-toggle').dataset.selectedValue || '',
-                month: document.querySelector('#dropdownMonthFilter .dropdown-toggle').dataset.selectedValue || '',
-                year: document.querySelector('#dropdownYearFilter .dropdown-toggle').dataset.selectedValue || '',
-                unit: document.querySelector('#dropdownUnitFilter .dropdown-toggle').dataset.selectedValue || '',
-                search: document.querySelector('.toolbar input[type="text"]').value || ''
-                // stage: document.querySelector('#dropdownStageFilter .dropdown-toggle').dataset.selectedValue || '', // Se você tiver filtro de estágio
+                analyst: document.getElementById('dropdownAnalystFilter')?.value || '',
+                month: document.getElementById('dropdownMonthFilter')?.value || '',
+                year: document.getElementById('dropdownYearFilter')?.value || '',
+                unit: document.getElementById('dropdownUnitFilter')?.value || '',
+                search: document.querySelector('.toolbar input[type="text"]')?.value || ''
             };
 
-            // Atualiza o filtro que acabou de ser clicado ou pesquisado
-            if (filterId === 'dropdownAnalystFilter') currentFilters.analyst = filterValue;
-            else if (filterId === 'dropdownMonthFilter') currentFilters.month = filterValue;
-            else if (filterId === 'dropdownYearFilter') currentFilters.year = filterValue;
-            else if (filterId === 'dropdownUnitFilter') currentFilters.unit = filterValue;
-            // else if (filterId === 'dropdownStageFilter') currentFilters.stage = filterValue; // Se você tiver filtro de estágio
-            else if (filterId === 'search') currentFilters.search = filterValue;
+    console.log("Enviando filtros para API:", currentFilters);
 
-            // Armazena o valor selecionado no botão do dropdown (útil para saber o estado atual)
-            const dropdownToggle = document.querySelector(`#${filterId} .dropdown-toggle`);
-            if (dropdownToggle) {
-                dropdownToggle.dataset.selectedValue = filterValue;
-            }
+    try {
+        const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
+        const data = await response.json();
 
-            console.log("Filtros atuais para enviar ao backend:", currentFilters);
+        // aqui você teria que recriar os cards com base no retorno
+        renderKanbanCards(data);
 
-            // para obter os dados filtrados e renderizar o Kanban novamente.
-        }
+    } catch (error) {
+        console.error('Erro ao aplicar filtros:', error);
+    }
+}
 
-        // Função para inicializar todos os dropdowns com dados
+// Função para inicializar todos os dropdowns com dados
 async function populateDropdownsInitial() {
-            // Analista/Vendedor
-            await populateDropdown('dropdownAnalystFilter', '/filtros/vendedores', 'vendedor_id', 'vendedor', 'Todos os Analistas');
-            
-            // Mês  <-- LINHA ALTERADA AQUI
-            await populateDropdown('dropdownMonthFilter', '/meses-vendas', 'mes', 'mes', 'Todos os Meses'); 
-            
-            // Ano
-            await populateDropdown('dropdownYearFilter', '/filtros/anos', 'ano', 'ano', 'Todos os Anos');
-            // Unidade
-            await populateDropdown('dropdownUnitFilter', '/filtros/unidades', 'ID', 'NOME', 'Todas as Unidades');
-        }
+    // Analista/Vendedor
+    await populateDropdown(
+        'dropdownAnalystFilter',
+        'https://crm-caramelo.onrender.com/api/filtros/vendedores',
+        'vendedor_id',
+        'vendedor',
+        'Todos os Analistas'
+    );
+
+    // Mês
+    await populateDropdown(
+        'dropdownMonthFilter',
+        'https://crm-caramelo.onrender.com/api/meses-vendas',
+        'mes',
+        'mes',
+        'Todos os Meses'
+    );
+
+    // Ano
+    await populateDropdown(
+        'dropdownYearFilter',
+        'https://crm-caramelo.onrender.com/api/filtros/anos',
+        'ano',
+        'ano',
+        'Todos os Anos'
+    );
+
+    // Unidade
+    await populateDropdown(
+        'dropdownUnitFilter',
+        'https://crm-caramelo.onrender.com/api/filtros/unidades',
+        'ID',
+        'NOME',
+        'Todas as Unidades'
+    );
+}
+
         // --- Event Listeners e Inicialização ---
 
         // Configura o evento de clique para todos os itens de dropdown
