@@ -449,6 +449,14 @@
         @endforeach
     </div>
 </div>
+        {{-- Coluna de Oportunidades personalizadas --}}
+    <div class="kanban-column" id="column-oportunidades-personalizadas">
+        <div class="kanban-column-header">
+            <h5>Oportunidades personalizadas</h5>
+            <div>
+                <span class="count" id="count-oportunidades-personalizadas">{{ count($kanban['Oportunidades personalizadas']) }}</span>
+            </div>
+        </div>
         <div class="kanban-cards">
             @foreach ($kanban['Oportunidades personalizadas'] as $oportunidade)
                 <div class="kanban-card open-client-modal" data-id="opp{{ $oportunidade->id }}" data-cliente-id="{{ $oportunidade->cliente_id }}">
@@ -468,7 +476,6 @@
             @endforeach
         </div>
     </div>
-</div>
     
     {{-- Você pode replicar a mesma estrutura para as outras colunas --}}
 
@@ -536,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-                        
+
                         // Adicione as outras propriedades que você retornou
                         modal.show();
                     })
