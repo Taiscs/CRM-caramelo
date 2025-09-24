@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 
 class OportunidadeController extends Controller
 {
+
+    
     // Página principal do Kanban
     public function index()
     {
@@ -209,50 +211,55 @@ class OportunidadeController extends Controller
     }
 
     // ====== OPORTUNIDADES FILTRADAS ======
-    public function oportunidadesFiltradas(Request $request)
-    {
-        $query = DB::table('vendas as v')
-            ->join('clientes as c', 'v.cliente_id', '=', 'c.id')
-            ->join('consultor_comercial as cc', 'v.vendedor_id', '=', 'cc.id')
-            ->select(
-                'v.id',
-                'v.cliente_id',
-                'v.evento',
-                'v.total',
-                'v.situacao',
-                'c.Nome as cliente_nome',
-                'c.Email',
-                'c.Telefone',
-                'cc.nome_consultor as vendedor_nome',
-                'cc.foto as foto_vendedor',
-                'v.data_evento'
-            );
+public function oportunidadesFiltradas(Request $request)
+{
+    $query = DB::table('vendas as v')
+        ->join('clientes as c', 'v.cliente_id', '=', 'c.id')
+        ->join('consultor_comercial as cc', 'v.vendedor_id', '=', 'cc.id')
+        ->select(
+            'v.id',
+            'v.cliente_id',
+            'v.evento',
+            'v.total',
+            'v.situacao',
+            'c.Nome as cliente_nome',
+            'c.Email',
+            'c.Telefone',
+            'cc.nome_consultor as vendedor_nome',
+            'cc.foto as foto_vendedor',
+            'v.data_evento'
+        );
 
-        if ($request->filled('analyst')) {
-            $query->where('v.vendedor_id', $request->analyst);
-        }
-
-        if ($request->filled('month')) {
-            $query->whereMonth('v.data_evento', $request->month);
-        }
-
-        if ($request->filled('year')) {
-            $query->whereYear('v.data_evento', $request->year);
-        }
-
-        if ($request->filled('unit')) {
-            $query->where('v.unidade_id', $request->unit);
-        }
-
-        if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('c.Nome', 'like', '%' . $request->search . '%')
-                  ->orWhere('v.evento', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $oportunidades = $query->get();
-
-        return response()->json($oportunidades);
+    if ($request->filled('analyst')) {
+        $query->where('v.vendedor_id', (int)$request->analyst);
     }
+
+    if ($request->filled('month')) {
+        $query->whereMonth('v.data_evento', (int)$request->month);
+    }
+
+    if ($request->filled('year')) {
+        $query->whereYear('v.data_evento', (int)$request->year);
+    }
+
+    if ($request->filled('unit')) {
+        $query->where('v.unidade', (int)$request->unit); // Corrigido de unidade_id para unidade
+    }
+
+    if ($request->filled('search')) {
+        $query->where(function($q) use ($request) {
+            $q->where('c.Nome', 'like', '%' . $request->search . '%')
+              ->orWhere('v.evento', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    // >>> Depuração: mostra a query e os filtros recebidos
+    $sql = $query->toSql();
+    dd($sql, $request->all());
+
+    $oportunidades = $query->get();
+
+    return response()->json($oportunidades);
+}
+
 }
