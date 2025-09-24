@@ -51,8 +51,9 @@ Route::get('/filtros/unidades', [GraficosController::class, 'unidadesDisponiveis
 Route::get('/filtros/vendedores', [GraficosController::class, 'vendedoresDisponiveis']);
 Route::get('/filtros/situacoes', [GraficosController::class, 'situacoesDisponiveis']);
 Route::get('/meses-vendas', [GraficosController::class, 'mesesDisponiveis']);
-Route::get('api/anos-vendas', [RelatorioController::class, 'anosVendas']);
-Route::get('/api/oportunidades-filtradas', [OportunidadeController::class, 'oportunidadesFiltradas']);
+Route::get('/anos-vendas', [RelatorioController::class, 'anosVendas']);
+Route::get('oportunidades-filtradas', [OportunidadeController::class, 'oportunidadesFiltradas']);
+
 
 
 
