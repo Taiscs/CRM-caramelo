@@ -30,6 +30,16 @@
             </select>
         </div>
 
+        
+        <div class="mb-3">
+                
+         <select name="ativo" class="form-select mb-2" required>
+            <option value="1" {{ $consultor->ativo ? 'selected' : '' }}>Ativo</option>
+            <option value="0" {{ !$consultor->ativo ? 'selected' : '' }}>Inativo</option>
+        </select>
+
+     </div>
+
         <div class="mb-3">
             <label for="foto" class="form-label">Foto do Vendedor</label>
             <input type="file" name="foto" class="form-control">
