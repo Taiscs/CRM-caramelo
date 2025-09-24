@@ -499,42 +499,33 @@
     async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
         try {
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Erro ao carregar ${url}: status ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Erro ao carregar ${url}`);
             const data = await response.json();
 
             const dropdown = document.querySelector(`#${dropdownId} + .dropdown-menu`);
-            if (!dropdown) {
-                console.warn(`Menu dropdown não encontrado para o ID: ${dropdownId}`);
-                return;
-            }
+            dropdown.innerHTML = '';
 
-            let dropdownHtml = '';
             if (defaultText) {
-                dropdownHtml += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
+                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
             }
 
             data.forEach(item => {
-                dropdownHtml += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
+                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
             });
-            dropdown.innerHTML = dropdownHtml;
 
         } catch (error) {
             console.error("Erro populando dropdown:", error);
         }
     }
 
-    // --- Inicializa todos os dropdowns ---
-    async function initDropdowns() {
-        // CORRIGIDO: Chamadas diretas e corretas para populateDropdown
-        await populateDropdown('dropdownAnalystFilter', '/api/analistas', 'id', 'nome_completo', 'Todos os Analistas');
-        await populateDropdown('dropdownMonthFilter', '/api/meses-vendas', 'mes', 'mes', 'Todos os Meses');
-        await populateDropdown('dropdownYearFilter', '/api/anos-vendas', 'ano', 'ano', 'Todos os Anos');
-        await populateDropdown('dropdownUnitFilter', '/api/unidades', 'ID', 'NOME', 'Todas as Unidades');
-        // Você precisa ajustar os URLs, valueKey e textKey para os outros dropdowns
-        // de acordo com os dados retornados pelas suas APIs.
-    }
+    // --- Inicializa dropdown de analistas ---
+    async function initDropdowns() {
+        await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'id', 'nome_completo', 'Todos os Analistas');
+    }
+    // --- Inicializa dropdown de analistas ---
+
+    
+    
 
     // --- Aplica filtros e atualiza o Kanban ---
     async function applyFilters() {
@@ -573,7 +564,11 @@
         colPotencial.innerHTML = '';
         colPersonalizadas.innerHTML = '';
 
-        const kanbanData = { 'venda': [], 'oportunidade': [] };
+        // Separa os dados por origem
+        const kanbanData = {
+            'venda': [],
+            'oportunidade': []
+        };
         dados.forEach(item => {
             if (item.origem === 'venda') {
                 kanbanData['venda'].push(item);
@@ -582,32 +577,52 @@
             }
         });
 
-        // Lógica de filtragem e renderização para balada
+        // Filtra e renderiza os cards para a coluna 'balada'
         const baladaCards = kanbanData['venda'].filter(item => {
             const dataEvento = new Date(item.data_evento);
             const proximoAniversario = new Date(new Date().getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
             const idadeProximoAniversario = (proximoAniversario.getFullYear() - dataEvento.getFullYear()) + (parseInt((item.evento.match(/\d{1,2}/) || ['0'])[0]));
+            
             return idadeProximoAniversario >= 12 && proximoAniversario >= new Date();
         });
-        baladaCards.forEach(item => colBalada.appendChild(createCardElement(item)));
 
-        // Lógica de filtragem e renderização para potencial
+        baladaCards.forEach(item => {
+            const card = createCardElement(item);
+            colBalada.appendChild(card);
+        });
+
+        // Filtra e renderiza os cards para a coluna 'potencial de ganho'
         const potencialCards = kanbanData['venda'].filter(item => {
             const dataEvento = new Date(item.data_evento);
             const proximoAniversario = new Date(new Date().getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
             const tresMesesFuturo = new Date();
             tresMesesFuturo.setMonth(tresMesesFuturo.getMonth() + 3);
+
             return proximoAniversario >= new Date() && proximoAniversario <= tresMesesFuturo;
         });
-        potencialCards.forEach(item => colPotencial.appendChild(createCardElement(item)));
 
-        // Renderização para personalizadas
-        kanbanData['oportunidade'].forEach(item => colPersonalizadas.appendChild(createCardElement(item)));
+        potencialCards.forEach(item => {
+            const card = createCardElement(item);
+            colPotencial.appendChild(card);
+        });
+
+        // Renderiza os cards para a coluna 'personalizadas'
+        kanbanData['oportunidade'].forEach(item => {
+            const card = createCardElement(item);
+            colPersonalizadas.appendChild(card);
+        });
 
         // Atualiza contadores
         document.getElementById('count-oportunidades-balada').textContent = baladaCards.length;
         document.getElementById('count-potencial-ganho').textContent = potencialCards.length;
         document.getElementById('count-oportunidades-personalizadas').textContent = kanbanData['oportunidade'].length;
+
+        // Atualiza valores totais
+        const totalBalada = baladaCards.reduce((sum, card) => sum + (card.total || 0), 0);
+        document.getElementById('value-oportunidades-balada').textContent = `R$ ${totalBalada.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        const totalPotencial = potencialCards.reduce((sum, card) => sum + (card.total || 0), 0);
+        document.getElementById('value-potencial-ganho').textContent = `R$ ${totalPotencial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
         // Adiciona os eventos de modal novamente aos novos cards
         bindModalEvents();
@@ -685,12 +700,10 @@
     // --- Filtro de busca ---
     const searchInput = document.querySelector('.toolbar input[type="text"]');
     let searchTimeout;
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => applyFilters(), 500);
-        });
-    }
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => applyFilters(), 500);
+    });
 
     // --- Evento do dropdown ---
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -710,8 +723,8 @@
 
     // Inicializa dropdowns e aplica filtro inicial
     initDropdowns().then(() => applyFilters());
-
 });
+
         // CÓDIGO DO MODAL (APENAS SE ESTIVER NO MESMO BLOCO DE SCRIPT)
         const cards = document.querySelectorAll('.open-client-modal');
         const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
