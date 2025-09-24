@@ -353,7 +353,7 @@
             <i class="fas fa-user-tie me-2"></i>Analista
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownAnalystFilter">
-            <li><a class="dropdown-item" href="#">Todos</a></li>
+            <li><a class="dropdown-item" href="#"></a></li>
             {{-- Esses serão populados via JS --}}
         </ul>
     </div>
@@ -525,7 +525,8 @@
             'https://crm-caramelo.onrender.com/api/analistas',
             'id', // id do analista
             'nome_completo', // nome completo
-            'Todos',
+            'Todos os Analistas'
+
         );
     }
 
