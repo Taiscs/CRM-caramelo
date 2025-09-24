@@ -14,7 +14,7 @@ use App\Http\Controllers\AnalistaController;
 use App\Http\Controllers\HistoricoComprasController;
 use App\Http\Controllers\KpiVendasController;
 use App\Http\Controllers\UnidadeController;
-
+use App\Http\Controllers\OportunidadeController;
 
 
 // Rotas de KPIs e relatórios
@@ -52,6 +52,7 @@ Route::get('/filtros/vendedores', [GraficosController::class, 'vendedoresDisponi
 Route::get('/filtros/situacoes', [GraficosController::class, 'situacoesDisponiveis']);
 Route::get('/meses-vendas', [GraficosController::class, 'mesesDisponiveis']);
 Route::get('api/anos-vendas', [RelatorioController::class, 'anosVendas']);
+Route::get('/api/oportunidades-filtradas', [OportunidadeController::class, 'oportunidadesFiltradas']);
 
 
 
