@@ -170,15 +170,19 @@ class OportunidadeController extends Controller
     }
 
     // ====== FILTROS ======
-    public function getVendedores()
-    {
-        $vendedores = DB::table('consultor_comercial')
-            ->select('id as vendedor_id', 'nome_consultor as vendedor')
-            ->orderBy('nome_consultor')
-            ->get();
+public function getVendedores()
+{
+    $vendedores = DB::table('consultor_comercial')
+        ->select(
+            'id as vendedor_id',
+            DB::raw("CONCAT(nome_consultor, ' ', sobrenome_consultor) as vendedor")
+        )
+        ->orderBy('nome_consultor')
+        ->get();
 
-        return response()->json($vendedores);
-    }
+    return response()->json($vendedores);
+}
+
 
     public function getMeses()
     {
@@ -202,7 +206,7 @@ class OportunidadeController extends Controller
 
     public function getUnidades()
     {
-        $unidades = DB::table('unidades')
+        $unidades = DB::table('unidade')
             ->select('id as ID', 'nome as NOME')
             ->orderBy('nome')
             ->get();
