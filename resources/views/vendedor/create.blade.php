@@ -34,8 +34,8 @@
         <div class="mb-3">
                 
          <select name="ativo" class="form-select mb-2" required>
-            <option value="1" {{ $consultor->ativo ? 'selected' : '' }}>Ativo</option>
-            <option value="0" {{ !$consultor->ativo ? 'selected' : '' }}>Inativo</option>
+            <option value="1" >Ativo</option>
+            <option value="0">Inativo</option>
         </select>
 
      </div>
