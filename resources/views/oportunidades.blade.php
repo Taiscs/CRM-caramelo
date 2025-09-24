@@ -348,15 +348,15 @@
     <input type="text" class="form-control" placeholder="Pesquisar oportunidade...">
     <button type="button" class="btn btn-primary"><i class="fas fa-plus-circle me-2"></i>Criar Nova Oportunidade</button>
     
-    <div class="dropdown">
-        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownAnalystFilter" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user-tie me-2"></i>Analista
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownAnalystFilter">
-            <li><a class="dropdown-item" href="#"></a></li>
-            {{-- Esses serão populados via JS --}}
-        </ul>
-    </div>
+<div class="dropdown">
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownAnalystFilter" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-user-tie me-2"></i>Analista
+    </button>
+    <ul class="dropdown-menu" id="dropdownAnalystFilter-menu" aria-labelledby="dropdownAnalystFilter">
+        <li><a class="dropdown-item" href="#"></a></li>
+        {{-- Esses serão populados via JS --}}
+    </ul>
+</div>
 
  
 
@@ -496,22 +496,18 @@
   document.addEventListener('DOMContentLoaded', function() {
 
     // --- Popula dropdown dinamicamente ---
- async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
+// --- Popula dropdown dinamicamente ---
+async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Erro ao carregar ${url}`);
         const data = await response.json();
 
-        // Procura o botão e depois seu irmão, que é o menu
         const dropdownButton = document.getElementById(dropdownId);
-        if (!dropdownButton) {
-            console.error(`Botão com ID "${dropdownId}" não encontrado.`);
-            return;
-        }
-        const dropdown = dropdownButton.nextElementSibling;
+        const dropdown = document.getElementById(dropdownId + '-menu');
 
-        if (!dropdown || !dropdown.classList.contains('dropdown-menu')) {
-            console.error(`Menu dropdown para o botão "${dropdownId}" não encontrado ou é o tipo errado.`);
+        if (!dropdownButton || !dropdown) {
+            console.error(`Botão ou menu com ID "${dropdownId}" não encontrado.`);
             return;
         }
 
@@ -525,11 +521,15 @@
             dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
         });
 
-        // Adiciona um listener para atualizar o texto do botão
+        // Este listener já existe na sua função, mas está correto.
         dropdown.addEventListener('click', function(event) {
             const target = event.target;
             if (target.classList.contains('dropdown-item')) {
+                // Previne a ação padrão de link
+                event.preventDefault(); 
                 dropdownButton.textContent = target.textContent;
+                dropdownButton.dataset.selectedValue = target.dataset.value;
+                applyFilters();
             }
         });
 
@@ -537,7 +537,6 @@
         console.error("Erro populando dropdown:", error);
     }
 }
-    // --- Inicializa dropdown de analistas ---
   // --- Inicializa dropdown de analistas ---
 async function initDropdowns() {
     await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'id', 'nome_completo', 'Todos os Analistas');
@@ -722,22 +721,6 @@ async function initDropdowns() {
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => applyFilters(), 500);
-    });
-
-    // --- Evento do dropdown ---
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.addEventListener('click', function(event) {
-            const target = event.target;
-            if (target.classList.contains('dropdown-item')) {
-                event.preventDefault();
-                const dropdownButton = this.previousElementSibling;
-                const value = target.dataset.value || '';
-                dropdownButton.dataset.selectedValue = value;
-                dropdownButton.textContent = target.textContent;
-                
-                applyFilters();
-            }
-        });
     });
 
     // Inicializa dropdowns e aplica filtro inicial
