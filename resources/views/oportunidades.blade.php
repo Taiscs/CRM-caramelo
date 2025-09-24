@@ -491,10 +491,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script>
-
-
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></scri
     // --- Popula dropdown dinamicamente ---
   document.addEventListener('DOMContentLoaded', function() {
 
@@ -664,7 +661,7 @@
                 </span>
             </div>
             <p>Próximo Aniversário: ${proximoAniversario}</p>
-            <p>Idade: ${idadeProximo_aniversario} anos</p>
+            <p>Idade: ${idadeProximoAniversario} anos</p>
             ${origemPersonalizadaHtml}
             <div class="analyst-info">
                 <img src="${item.foto_vendedor ?? 'assets/default-avatar.png'}" alt="${vendedor}">
