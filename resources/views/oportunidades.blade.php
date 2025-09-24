@@ -496,33 +496,52 @@
   document.addEventListener('DOMContentLoaded', function() {
 
     // --- Popula dropdown dinamicamente ---
-    async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Erro ao carregar ${url}`);
-            const data = await response.json();
+ async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Erro ao carregar ${url}`);
+        const data = await response.json();
 
-            const dropdown = document.querySelector(`#${dropdownId} + .dropdown-menu`);
-            dropdown.innerHTML = '';
-
-            if (defaultText) {
-                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
-            }
-
-            data.forEach(item => {
-                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
-            });
-
-        } catch (error) {
-            console.error("Erro populando dropdown:", error);
+        // Procura o botão e depois seu irmão, que é o menu
+        const dropdownButton = document.getElementById(dropdownId);
+        if (!dropdownButton) {
+            console.error(`Botão com ID "${dropdownId}" não encontrado.`);
+            return;
         }
-    }
+        const dropdown = dropdownButton.nextElementSibling;
 
+        if (!dropdown || !dropdown.classList.contains('dropdown-menu')) {
+            console.error(`Menu dropdown para o botão "${dropdownId}" não encontrado ou é o tipo errado.`);
+            return;
+        }
+
+        dropdown.innerHTML = '';
+
+        if (defaultText) {
+            dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
+        }
+
+        data.forEach(item => {
+            dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
+        });
+
+        // Adiciona um listener para atualizar o texto do botão
+        dropdown.addEventListener('click', function(event) {
+            const target = event.target;
+            if (target.classList.contains('dropdown-item')) {
+                dropdownButton.textContent = target.textContent;
+            }
+        });
+
+    } catch (error) {
+        console.error("Erro populando dropdown:", error);
+    }
+}
     // --- Inicializa dropdown de analistas ---
-    async function initDropdowns() {
-        await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'id', 'nome_completo', 'Todos os Analistas');
-    }
-    // --- Inicializa dropdown de analistas ---
+  // --- Inicializa dropdown de analistas ---
+async function initDropdowns() {
+    await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'id', 'nome_completo', 'Todos os Analistas');
+} --- Inicializa dropdown de analistas ---
 
     
     
