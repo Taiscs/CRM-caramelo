@@ -389,10 +389,12 @@
                     </div>
                     <p>Próximo Aniversário: {{ \Carbon\Carbon::parse($oportunidade->proximo_aniversario)->format('d/m/Y') }}</p>
                     <p>Idade: {{ $oportunidade->idade_proximo_aniversario }} anos</p>
-                    <div class="analyst-info">
-                        <img src="{{ $oportunidade->foto_vendedor }}" alt="{{ $oportunidade->vendedor_nome }}">
-                        {{ $oportunidade->vendedor_nome }}
+                       <div class="analyst-info">
+                        <img src="{{ $oportunidade->foto_vendedor ?? asset('assets/default-avatar.png') }}" 
+                            alt="{{ $oportunidade->vendedor_nome ?? 'Sem vendedor' }}">
+                        {{ $oportunidade->vendedor_nome ?? 'Sem vendedor' }}
                     </div>
+
                 </div>
             @endforeach
         </div>
@@ -423,7 +425,7 @@
                 <p>Próximo Aniversário: {{ \Carbon\Carbon::parse($oportunidade->proximo_aniversario)->format('d/m/Y') }}</p>
                 <p>Idade: {{ $oportunidade->idade_proximo_aniversario }} anos</p>
                 <div class="analyst-info">
-                    <img src="{{ $oportunidade->foto_vendedor }}" alt="{{ $oportunidade->vendedor_nome }}">
+                    <img src="{{ $oportunidade->foto_vendedor ?? asset('assets/default-avatar.png') }}" alt="{{ $oportunidade->vendedor_nome }}">
                     {{ $oportunidade->vendedor_nome }}
                 </div>
             </div>
@@ -450,7 +452,7 @@
                     </div>
                     <p>Último Evento: {{ $oportunidade->ultimo_evento ?? 'N/A' }}</p>
                     <div class="analyst-info">
-                        <img src="{{ $oportunidade->foto_vendedor }}" alt="{{ $oportunidade->vendedor_nome }}">
+                        <img src="{{ $oportunidade->foto_vendedor ?? asset('assets/default-avatar.png') }}" alt="{{ $oportunidade->vendedor_nome }}">
                         {{ $oportunidade->vendedor_nome }}
                     </div>
                 </div>
@@ -491,21 +493,18 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
 
-    // --- Ícones do filtro ---
-    function getIconForFilter(filterId) {
-        if (filterId === 'dropdownAnalystFilter') return 'fas fa-user-tie';
-        return '';
-    }
 
-    // --- Popula dropdown ---
+    // --- Popula dropdown dinamicamente ---
+  document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Popula dropdown dinamicamente ---
     async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Erro ao carregar ${url}`);
-
             const data = await response.json();
+
             const dropdown = document.querySelector(`#${dropdownId} + .dropdown-menu`);
             dropdown.innerHTML = '';
 
@@ -513,166 +512,223 @@ document.addEventListener('DOMContentLoaded', function() {
                 dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
             }
 
-            if (Array.isArray(data)) {
-                data.forEach(item => {
-                    const value = item[valueKey];
-                    const text = item[textKey];
-                    dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${value}">${text}</a></li>`;
-                });
-            }
+            data.forEach(item => {
+                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
+            });
 
         } catch (error) {
             console.error("Erro populando dropdown:", error);
         }
     }
 
-    // --- Renderiza cards ---
-    function renderKanbanCards(data) {
-        const columns = {
-            'Oportunidades mundo balada': document.getElementById('column-oportunidades-balada').querySelector('.kanban-cards'),
-            'Potencial de Ganho': document.getElementById('column-potencial-ganho').querySelector('.kanban-cards'),
-            'Oportunidades personalizadas': document.getElementById('column-oportunidades-personalizadas').querySelector('.kanban-cards')
-        };
-
-        const counts = {
-            'Oportunidades mundo balada': document.getElementById('count-oportunidades-balada'),
-            'Potencial de Ganho': document.getElementById('count-potencial-ganho'),
-            'Oportunidades personalizadas': document.getElementById('count-oportunidades-personalizadas')
-        };
-
-        const totals = {
-            'Oportunidades mundo balada': document.getElementById('value-oportunidades-balada'),
-            'Potencial de Ganho': document.getElementById('value-potencial-ganho')
-        };
-
-        // Limpa colunas
-        Object.values(columns).forEach(col => col.innerHTML = '');
-
-        let counters = {
-            'Oportunidades mundo balada': 0,
-            'Potencial de Ganho': 0,
-            'Oportunidades personalizadas': 0
-        };
-
-        let totalValues = {
-            'Oportunidades mundo balada': 0,
-            'Potencial de Ganho': 0
-        };
-
-        data.forEach(item => {
-            let columnKey = item.situacao || 'Oportunidades personalizadas';
-            if (!columns[columnKey]) columnKey = 'Oportunidades personalizadas';
-
-            const card = document.createElement('div');
-            card.classList.add('kanban-card', 'open-client-modal');
-            card.dataset.id = 'opp' + item.id;
-            card.dataset.clienteId = item.cliente_id;
-
-            let innerHtml = '';
-
-            if (columnKey === 'Oportunidades personalizadas') {
-                innerHtml = `
-                    <h6>${item.descricao_oportunidade || item.evento || ''}</h6>
-                    <div class="client-name">Cliente: ${item.cliente_nome || ''}</div>
-                    <div class="value-date">
-                        ${item.total ? `<span class="value">R$ ${Number(item.total).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>` : ''}
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> ${item.data_oportunidade ? new Date(item.data_oportunidade).toLocaleDateString('pt-BR') : 'N/A'}</span>
-                    </div>
-                    <p>Último Evento: ${item.ultimo_evento || 'N/A'}</p>
-                    <div class="analyst-info">
-                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}">
-                        ${item.vendedor_nome || 'Não atribuído'}
-                    </div>
-                `;
-            } else {
-                innerHtml = `
-                    <h6>${item.evento || ''}</h6>
-                    <div class="client-name">Cliente: ${item.cliente_nome || ''}</div>
-                    <div class="value-date">
-                        <span class="value">R$ ${Number(item.total).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
-                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> ${item.data_evento ? new Date(item.data_evento).toLocaleDateString('pt-BR') : ''}</span>
-                    </div>
-                    <p>Próximo Aniversário: ${item.proximo_aniversario ? new Date(item.proximo_aniversario).toLocaleDateString('pt-BR') : ''}</p>
-                    <p>Idade: ${item.idade_proximo_aniversario || ''} anos</p>
-                    <div class="analyst-info">
-                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}">
-                        ${item.vendedor_nome || 'Não atribuído'}
-                    </div>
-                `;
-                totalValues[columnKey] += Number(item.total) || 0;
-            }
-
-            card.innerHTML = innerHtml;
-            columns[columnKey].appendChild(card);
-            counters[columnKey]++;
-        });
-
-        // Atualiza contadores e totais
-        Object.keys(counts).forEach(key => counts[key].textContent = counters[key]);
-        Object.keys(totals).forEach(key => totals[key].textContent = 'R$ ' + totalValues[key].toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}));
+    // --- Inicializa dropdown de analistas ---
+    async function initDropdowns() {
+        await populateDropdown(
+            'dropdownAnalystFilter',
+            'https://crm-caramelo.onrender.com/api/analistas',
+            'id', // id do analista
+            'nome_completo', // nome completo
+            'Todos',
+        );
     }
 
-    // --- Aplica filtros ---
-    async function applyFilters(filterId = null, filterValue = null) {
-        const currentFilters = {
-            analyst: document.querySelector('#dropdownAnalystFilter .dropdown-toggle')?.dataset.selectedValue || '',
-            search: document.querySelector('.toolbar input[type="text"]')?.value || ''
-        };
+    // --- Aplica filtros e atualiza o Kanban ---
+    async function applyFilters() {
+        const analystId = document.querySelector('#dropdownAnalystFilter .dropdown-toggle')?.dataset.selectedValue || '';
+        const searchTerm = document.querySelector('.toolbar input[type="text"]')?.value || '';
 
-        if (filterId && filterValue !== null) {
-            if (filterId === 'dropdownAnalystFilter') currentFilters.analyst = filterValue;
-            else if (filterId === 'search') currentFilters.search = filterValue;
-
-            const dropdownButton = document.querySelector(`#${filterId} .dropdown-toggle`);
-            if (dropdownButton) dropdownButton.dataset.selectedValue = filterValue;
+        // Cria a query string com os filtros existentes
+        const params = new URLSearchParams();
+        if (analystId) {
+            params.append('analyst', analystId);
+        }
+        if (searchTerm) {
+            params.append('search', searchTerm);
         }
 
+        const queryString = params.toString();
+        const url = `https://crm-caramelo.onrender.com/api/oportunidades-filtradas${queryString ? '?' + queryString : ''}`;
+
         try {
-            const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
+            const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-
             renderKanbanCards(data);
         } catch (error) {
             console.error('Erro ao aplicar filtros:', error);
         }
     }
 
-    // --- Inicializa dropdowns ---
-    async function initDropdowns() {
-        await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'vendedor_id', 'vendedor', 'Todos os Analistas');
+    // --- Renderiza cards nas colunas ---
+    function renderKanbanCards(dados) {
+        const colBalada = document.getElementById('column-oportunidades-balada').querySelector('.kanban-cards');
+        const colPotencial = document.getElementById('column-potencial-ganho').querySelector('.kanban-cards');
+        const colPersonalizadas = document.getElementById('column-oportunidades-personalizadas').querySelector('.kanban-cards');
+
+        colBalada.innerHTML = '';
+        colPotencial.innerHTML = '';
+        colPersonalizadas.innerHTML = '';
+
+        // Separa os dados por origem
+        const kanbanData = {
+            'venda': [],
+            'oportunidade': []
+        };
+        dados.forEach(item => {
+            if (item.origem === 'venda') {
+                kanbanData['venda'].push(item);
+            } else if (item.origem === 'oportunidade') {
+                kanbanData['oportunidade'].push(item);
+            }
+        });
+
+        // Filtra e renderiza os cards para a coluna 'balada'
+        const baladaCards = kanbanData['venda'].filter(item => {
+            const dataEvento = new Date(item.data_evento);
+            const proximoAniversario = new Date(new Date().getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
+            const idadeProximoAniversario = (proximoAniversario.getFullYear() - dataEvento.getFullYear()) + (parseInt((item.evento.match(/\d{1,2}/) || ['0'])[0]));
+            
+            return idadeProximoAniversario >= 12 && proximoAniversario >= new Date();
+        });
+
+        baladaCards.forEach(item => {
+            const card = createCardElement(item);
+            colBalada.appendChild(card);
+        });
+
+        // Filtra e renderiza os cards para a coluna 'potencial de ganho'
+        const potencialCards = kanbanData['venda'].filter(item => {
+            const dataEvento = new Date(item.data_evento);
+            const proximoAniversario = new Date(new Date().getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
+            const tresMesesFuturo = new Date();
+            tresMesesFuturo.setMonth(tresMesesFuturo.getMonth() + 3);
+
+            return proximoAniversario >= new Date() && proximoAniversario <= tresMesesFuturo;
+        });
+
+        potencialCards.forEach(item => {
+            const card = createCardElement(item);
+            colPotencial.appendChild(card);
+        });
+
+        // Renderiza os cards para a coluna 'personalizadas'
+        kanbanData['oportunidade'].forEach(item => {
+            const card = createCardElement(item);
+            colPersonalizadas.appendChild(card);
+        });
+
+        // Atualiza contadores
+        document.getElementById('count-oportunidades-balada').textContent = baladaCards.length;
+        document.getElementById('count-potencial-ganho').textContent = potencialCards.length;
+        document.getElementById('count-oportunidades-personalizadas').textContent = kanbanData['oportunidade'].length;
+
+        // Atualiza valores totais
+        const totalBalada = baladaCards.reduce((sum, card) => sum + (card.total || 0), 0);
+        document.getElementById('value-oportunidades-balada').textContent = `R$ ${totalBalada.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        const totalPotencial = potencialCards.reduce((sum, card) => sum + (card.total || 0), 0);
+        document.getElementById('value-potencial-ganho').textContent = `R$ ${totalPotencial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        // Adiciona os eventos de modal novamente aos novos cards
+        bindModalEvents();
     }
 
-    // --- Eventos dropdown ---
+    function createCardElement(item) {
+        const card = document.createElement('div');
+        card.classList.add('kanban-card', 'open-client-modal');
+        card.dataset.clienteId = item.cliente_id;
+        card.dataset.id = `opp${item.id}`;
+
+        const vendedor = item.vendedor_nome || '-';
+        const total = item.total ? `<span class="value">R$ ${Number(item.total).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}` : '';
+        const eventName = item.evento || item.descricao_oportunidade || '-';
+        const dataUltimaFesta = item.data_evento ? new Date(item.data_evento).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '') : '';
+        const proximoAniversario = item.data_evento ? new Date(new Date().getFullYear(), new Date(item.data_evento).getMonth(), new Date(item.data_evento).getDate()).toLocaleDateString('pt-BR') : 'N/A';
+        const idadeProximoAniversario = item.data_evento ? ((new Date(new Date().getFullYear(), new Date(item.data_evento).getMonth(), new Date(item.data_evento).getDate()).getFullYear() - new Date(item.data_evento).getFullYear()) + parseInt((item.evento.match(/\d{1,2}/) || ['0'])[0])) : 'N/A';
+
+        const origemPersonalizadaHtml = item.origem === 'oportunidade' ?
+            `<p>Último Evento: ${item.ultimo_evento ?? 'N/A'}</p>
+             <div class="value-date">
+                <span class="due-date">
+                    <i class="far fa-calendar-alt me-1"></i> Data: ${new Date(item.data_oportunidade).toLocaleDateString('pt-BR')}
+                </span>
+            </div>` : '';
+
+        card.innerHTML = `
+            <h6>${eventName}</h6>
+            <div class="client-name">Cliente: ${item.cliente_nome}</div>
+            <div class="value-date">
+                ${total}
+                <span class="due-date">
+                    <i class="far fa-calendar-alt me-1"></i> ${dataUltimaFesta}
+                </span>
+            </div>
+            <p>Próximo Aniversário: ${proximoAniversario}</p>
+            <p>Idade: ${idadeProximo_aniversario} anos</p>
+            ${origemPersonalizadaHtml}
+            <div class="analyst-info">
+                <img src="${item.foto_vendedor ?? 'assets/default-avatar.png'}" alt="${vendedor}">
+                ${vendedor}
+            </div>
+        `;
+
+        return card;
+    }
+
+    // --- Modal de cliente ---
+    function bindModalEvents() {
+        const cards = document.querySelectorAll('.open-client-modal');
+        const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
+
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                const clienteId = this.dataset.clienteId;
+
+                if (clienteId) {
+                    fetch(`/cliente/${clienteId}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Cliente não encontrado');
+                            return response.json();
+                        })
+                        .then(data => {
+                            document.getElementById('clientName').textContent = data.Nome;
+                            document.getElementById('clientEmail').textContent = data.Email;
+                            document.getElementById('clientPhone').textContent = data.Telefone;
+                            modal.show();
+                        })
+                        .catch(error => console.error('Erro ao buscar dados do cliente:', error));
+                }
+            });
+        });
+    }
+
+    // --- Filtro de busca ---
+    const searchInput = document.querySelector('.toolbar input[type="text"]');
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => applyFilters(), 500);
+    });
+
+    // --- Evento do dropdown ---
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
         menu.addEventListener('click', function(event) {
             const target = event.target;
             if (target.classList.contains('dropdown-item')) {
                 event.preventDefault();
                 const dropdownButton = this.previousElementSibling;
-                const filterId = dropdownButton.id;
-                const filterValue = target.dataset.value || '';
-
-                dropdownButton.dataset.selectedValue = filterValue;
-                dropdownButton.innerHTML = `<i class="${getIconForFilter(filterId)} me-2"></i> ${target.textContent}`;
-
-                applyFilters(filterId, filterValue);
+                const value = target.dataset.value || '';
+                dropdownButton.dataset.selectedValue = value;
+                dropdownButton.textContent = target.textContent;
+                
+                applyFilters();
             }
         });
     });
 
-    // --- Busca ---
-    const searchInput = document.querySelector('.toolbar input[type="text"]');
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => applyFilters('search', this.value), 500);
-    });
-
-    // Inicializa
-    initDropdowns();
+    // Inicializa dropdowns e aplica filtro inicial
+    initDropdowns().then(() => applyFilters());
 });
-
 
         // CÓDIGO DO MODAL (APENAS SE ESTIVER NO MESMO BLOCO DE SCRIPT)
         const cards = document.querySelectorAll('.open-client-modal');
@@ -701,7 +757,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
- 
+
+
 </script>   
 
 
