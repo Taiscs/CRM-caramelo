@@ -99,30 +99,26 @@ class OportunidadeController extends Controller
         // "Oportunidades Personalizadas"
         $sqlOportunidadesPersonalizadas = "
             SELECT
-                o.id,
-                o.cliente_id,
-                o.descricao_oportunidade,
-                o.data_oportunidade,
-                c.Nome AS cliente_nome,
-                v.evento AS ultimo_evento,
-                cc.nome_consultor AS vendedor_nome,
-                cc.foto AS foto_vendedor
-            FROM
-                oportunidades o
-            JOIN clientes c ON o.cliente_id = c.Id
-            LEFT JOIN (
-                SELECT
-                    cliente_id,
-                    MAX(id) AS ultimo_id
-                FROM
-                    vendas
-                GROUP BY
-                    cliente_id
-            ) AS ultimas_vendas ON o.cliente_id = ultimas_vendas.cliente_id
-            LEFT JOIN vendas v ON ultimas_vendas.ultimo_id = v.id
-            LEFT JOIN consultor_comercial cc ON v.vendedor_id = cc.id
-            ORDER BY
-                o.data_oportunidade DESC;";
+                    o.id,
+    o.cliente_id,
+    o.vendedor_id,
+    o.descricao_oportunidade,
+    o.data_oportunidade,
+    c.Nome AS cliente_nome,
+    v.evento AS ultimo_evento,
+    COALESCE(cc1.nome_consultor, cc2.nome_consultor) AS vendedor_nome,
+    COALESCE(cc1.foto, cc2.foto) AS foto_vendedor
+FROM oportunidades o
+JOIN clientes c ON o.cliente_id = c.Id
+LEFT JOIN (
+    SELECT cliente_id, MAX(id) AS ultimo_id
+    FROM vendas
+    GROUP BY cliente_id
+) AS ultimas_vendas ON o.cliente_id = ultimas_vendas.cliente_id
+LEFT JOIN vendas v ON ultimas_vendas.ultimo_id = v.id
+LEFT JOIN consultor_comercial cc1 ON v.vendedor_id = cc1.id
+LEFT JOIN consultor_comercial cc2 ON o.vendedor_id = cc2.id
+ORDER BY o.data_oportunidade DESC;";
 
         $oportunidadesPersonalizadas = DB::select($sqlOportunidadesPersonalizadas);
 
