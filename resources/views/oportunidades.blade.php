@@ -585,8 +585,8 @@
             if (filterId === 'search') currentFilters.search = filterValue;
         }
 
-        try {
-            const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
+        try {                              
+            const response = await fetch(`https://crm-caramelo.onrender.com/api/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             renderKanbanCards(data);
