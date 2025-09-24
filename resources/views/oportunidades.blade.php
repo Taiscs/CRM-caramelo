@@ -493,13 +493,13 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- Função para retornar o ícone correto para o filtro ---
+    // --- Ícones do filtro ---
     function getIconForFilter(filterId) {
         if (filterId === 'dropdownAnalystFilter') return 'fas fa-user-tie';
         return '';
     }
 
-    // --- Popula dropdown dinamicamente ---
+    // --- Popula dropdown ---
     async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
         try {
             const response = await fetch(url);
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dropdown.innerHTML = '';
 
             if (defaultText) {
-                dropdown.innerHTML += `<li><a class="dropdown-item" href="#">${defaultText}</a></li>`;
+                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
             }
 
             if (Array.isArray(data)) {
@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- Renderiza cards nas colunas ---
+    // --- Renderiza cards ---
     function renderKanbanCards(data) {
         const columns = {
             'Oportunidades mundo balada': document.getElementById('column-oportunidades-balada').querySelector('.kanban-cards'),
@@ -560,7 +560,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         data.forEach(item => {
-            // Usa 'situacao' para decidir a coluna; padrão para personalizadas
             let columnKey = item.situacao || 'Oportunidades personalizadas';
             if (!columns[columnKey]) columnKey = 'Oportunidades personalizadas';
 
@@ -573,22 +572,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (columnKey === 'Oportunidades personalizadas') {
                 innerHtml = `
-                    <h6>${item.descricao_oportunidade || item.evento}</h6>
-                    <div class="client-name">Cliente: ${item.cliente_nome}</div>
+                    <h6>${item.descricao_oportunidade || item.evento || ''}</h6>
+                    <div class="client-name">Cliente: ${item.cliente_nome || ''}</div>
                     <div class="value-date">
                         ${item.total ? `<span class="value">R$ ${Number(item.total).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>` : ''}
                         <span class="due-date"><i class="far fa-calendar-alt me-1"></i> ${item.data_oportunidade ? new Date(item.data_oportunidade).toLocaleDateString('pt-BR') : 'N/A'}</span>
                     </div>
                     <p>Último Evento: ${item.ultimo_evento || 'N/A'}</p>
                     <div class="analyst-info">
-                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}|| ''}">
-                        ${item.vendedor_nome || 'Não atribuído'}|| ''}
+                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}">
+                        ${item.vendedor_nome || 'Não atribuído'}
                     </div>
                 `;
             } else {
                 innerHtml = `
-                    <h6>${item.evento}</h6>
-                    <div class="client-name">Cliente: ${item.cliente_nome}</div>
+                    <h6>${item.evento || ''}</h6>
+                    <div class="client-name">Cliente: ${item.cliente_nome || ''}</div>
                     <div class="value-date">
                         <span class="value">R$ ${Number(item.total).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
                         <span class="due-date"><i class="far fa-calendar-alt me-1"></i> ${item.data_evento ? new Date(item.data_evento).toLocaleDateString('pt-BR') : ''}</span>
@@ -596,8 +595,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p>Próximo Aniversário: ${item.proximo_aniversario ? new Date(item.proximo_aniversario).toLocaleDateString('pt-BR') : ''}</p>
                     <p>Idade: ${item.idade_proximo_aniversario || ''} anos</p>
                     <div class="analyst-info">
-                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}|| ''}">
-                        ${item.vendedor_nome || 'Não atribuído'}|| ''}
+                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}">
+                        ${item.vendedor_nome || 'Não atribuído'}
                     </div>
                 `;
                 totalValues[columnKey] += Number(item.total) || 0;
@@ -613,7 +612,7 @@ document.addEventListener('DOMContentLoaded', function() {
         Object.keys(totals).forEach(key => totals[key].textContent = 'R$ ' + totalValues[key].toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}));
     }
 
-    // --- Aplica filtros e atualiza o Kanban ---
+    // --- Aplica filtros ---
     async function applyFilters(filterId = null, filterValue = null) {
         const currentFilters = {
             analyst: document.querySelector('#dropdownAnalystFilter .dropdown-toggle')?.dataset.selectedValue || '',
@@ -639,12 +638,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- Inicializa dropdown de analista ---
+    // --- Inicializa dropdowns ---
     async function initDropdowns() {
         await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'vendedor_id', 'vendedor', 'Todos os Analistas');
     }
 
-    // --- Evento de clique no dropdown ---
+    // --- Eventos dropdown ---
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
         menu.addEventListener('click', function(event) {
             const target = event.target;
@@ -652,7 +651,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 event.preventDefault();
                 const dropdownButton = this.previousElementSibling;
                 const filterId = dropdownButton.id;
-                const filterValue = target.dataset.value || target.textContent;
+                const filterValue = target.dataset.value || '';
 
                 dropdownButton.dataset.selectedValue = filterValue;
                 dropdownButton.innerHTML = `<i class="${getIconForFilter(filterId)} me-2"></i> ${target.textContent}`;
@@ -662,7 +661,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- Filtro de busca ---
+    // --- Busca ---
     const searchInput = document.querySelector('.toolbar input[type="text"]');
     let searchTimeout;
     searchInput.addEventListener('input', function() {
@@ -670,10 +669,9 @@ document.addEventListener('DOMContentLoaded', function() {
         searchTimeout = setTimeout(() => applyFilters('search', this.value), 500);
     });
 
-    // Inicializa dropdowns
+    // Inicializa
     initDropdowns();
 });
-
 
 
         // CÓDIGO DO MODAL (APENAS SE ESTIVER NO MESMO BLOCO DE SCRIPT)
