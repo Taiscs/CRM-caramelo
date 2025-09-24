@@ -526,6 +526,93 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- Renderiza cards nas colunas ---
+    function renderKanbanCards(data) {
+        const columns = {
+            'Oportunidades mundo balada': document.getElementById('column-oportunidades-balada').querySelector('.kanban-cards'),
+            'Potencial de Ganho': document.getElementById('column-potencial-ganho').querySelector('.kanban-cards'),
+            'Oportunidades personalizadas': document.getElementById('column-oportunidades-personalizadas').querySelector('.kanban-cards')
+        };
+
+        const counts = {
+            'Oportunidades mundo balada': document.getElementById('count-oportunidades-balada'),
+            'Potencial de Ganho': document.getElementById('count-potencial-ganho'),
+            'Oportunidades personalizadas': document.getElementById('count-oportunidades-personalizadas')
+        };
+
+        const totals = {
+            'Oportunidades mundo balada': document.getElementById('value-oportunidades-balada'),
+            'Potencial de Ganho': document.getElementById('value-potencial-ganho')
+        };
+
+        // Limpa colunas
+        Object.values(columns).forEach(col => col.innerHTML = '');
+
+        let counters = {
+            'Oportunidades mundo balada': 0,
+            'Potencial de Ganho': 0,
+            'Oportunidades personalizadas': 0
+        };
+
+        let totalValues = {
+            'Oportunidades mundo balada': 0,
+            'Potencial de Ganho': 0
+        };
+
+        data.forEach(item => {
+            // Usa 'situacao' para decidir a coluna; padrão para personalizadas
+            let columnKey = item.situacao || 'Oportunidades personalizadas';
+            if (!columns[columnKey]) columnKey = 'Oportunidades personalizadas';
+
+            const card = document.createElement('div');
+            card.classList.add('kanban-card', 'open-client-modal');
+            card.dataset.id = 'opp' + item.id;
+            card.dataset.clienteId = item.cliente_id;
+
+            let innerHtml = '';
+
+            if (columnKey === 'Oportunidades personalizadas') {
+                innerHtml = `
+                    <h6>${item.descricao_oportunidade || item.evento}</h6>
+                    <div class="client-name">Cliente: ${item.cliente_nome}</div>
+                    <div class="value-date">
+                        ${item.total ? `<span class="value">R$ ${Number(item.total).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>` : ''}
+                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> ${item.data_oportunidade ? new Date(item.data_oportunidade).toLocaleDateString('pt-BR') : 'N/A'}</span>
+                    </div>
+                    <p>Último Evento: ${item.ultimo_evento || 'N/A'}</p>
+                    <div class="analyst-info">
+                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}|| ''}">
+                        ${item.vendedor_nome || 'Não atribuído'}|| ''}
+                    </div>
+                `;
+            } else {
+                innerHtml = `
+                    <h6>${item.evento}</h6>
+                    <div class="client-name">Cliente: ${item.cliente_nome}</div>
+                    <div class="value-date">
+                        <span class="value">R$ ${Number(item.total).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                        <span class="due-date"><i class="far fa-calendar-alt me-1"></i> ${item.data_evento ? new Date(item.data_evento).toLocaleDateString('pt-BR') : ''}</span>
+                    </div>
+                    <p>Próximo Aniversário: ${item.proximo_aniversario ? new Date(item.proximo_aniversario).toLocaleDateString('pt-BR') : ''}</p>
+                    <p>Idade: ${item.idade_proximo_aniversario || ''} anos</p>
+                    <div class="analyst-info">
+                        <img src="${item.foto_vendedor || ''}" alt="${item.vendedor_nome || 'Não atribuído'}|| ''}">
+                        ${item.vendedor_nome || 'Não atribuído'}|| ''}
+                    </div>
+                `;
+                totalValues[columnKey] += Number(item.total) || 0;
+            }
+
+            card.innerHTML = innerHtml;
+            columns[columnKey].appendChild(card);
+            counters[columnKey]++;
+        });
+
+        // Atualiza contadores e totais
+        Object.keys(counts).forEach(key => counts[key].textContent = counters[key]);
+        Object.keys(totals).forEach(key => totals[key].textContent = 'R$ ' + totalValues[key].toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}));
+    }
+
     // --- Aplica filtros e atualiza o Kanban ---
     async function applyFilters(filterId = null, filterValue = null) {
         const currentFilters = {
@@ -541,14 +628,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (dropdownButton) dropdownButton.dataset.selectedValue = filterValue;
         }
 
-        console.log("Filtros enviados:", currentFilters);
-
         try {
             const response = await fetch(`https://crm-caramelo.onrender.com/api/oportunidades-filtradas?` + new URLSearchParams(currentFilters));
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
 
-            renderKanbanCards(data); // função para exibir os cards
+            renderKanbanCards(data);
         } catch (error) {
             console.error('Erro ao aplicar filtros:', error);
         }
@@ -559,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function() {
         await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'vendedor_id', 'vendedor', 'Todos os Analistas');
     }
 
-    // --- Evento de clique no dropdown de analista ---
+    // --- Evento de clique no dropdown ---
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
         menu.addEventListener('click', function(event) {
             const target = event.target;
@@ -569,7 +654,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const filterId = dropdownButton.id;
                 const filterValue = target.dataset.value || target.textContent;
 
-                // Atualiza dataset e texto do botão
                 dropdownButton.dataset.selectedValue = filterValue;
                 dropdownButton.innerHTML = `<i class="${getIconForFilter(filterId)} me-2"></i> ${target.textContent}`;
 
@@ -578,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- Filtro de busca por cliente ---
+    // --- Filtro de busca ---
     const searchInput = document.querySelector('.toolbar input[type="text"]');
     let searchTimeout;
     searchInput.addEventListener('input', function() {
