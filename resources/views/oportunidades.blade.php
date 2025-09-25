@@ -346,7 +346,7 @@
 
 <div class="toolbar">
     <input type="text" class="form-control" placeholder="Pesquisar oportunidade...">
-    <button type="button" class="btn btn-primary"><i class="fas fa-plus-circle me-2"></i>Criar Nova Oportunidade</button>
+    <button type="button" class="btn btn-primary" id="btn-criar-oportunidade"><i class="fas fa-plus-circle me-2"></i>Criar Nova Oportunidade</button>
     
 <div class="dropdown">
     <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownAnalystFilter" data-bs-toggle="dropdown" aria-expanded="false">
@@ -479,6 +479,49 @@
   </div>
 </div>
 
+<div class="modal fade" id="modal-oportunidade" tabindex="-1" aria-labelledby="modalOportunidadeLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalOportunidadeLabel">Criar Nova Oportunidade</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+          <div class="modal-body">
+    <form id="form-oportunidade">
+           <div class="mb-3">
+                    <label for="cliente_id" class="form-label">Cliente</label>
+                    <select class="form-select" id="cliente_id" name="cliente_id" required>
+                        <option value="">Carregando clientes...</option>
+                    </select>
+                </div>
+
+        <div class="mb-3">
+            <label for="vendedor_id" class="form-label">Vendedor</label>
+            <select class="form-select" id="vendedor_id" name="vendedor_id" required>
+                <option value="">Carregando vendedores...</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="descricao_oportunidade" class="form-label">Descrição da Oportunidade</label>
+            <textarea class="form-control" id="descricao_oportunidade" name="descricao_oportunidade" rows="3" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="data_oportunidade" class="form-label">Data da Oportunidade</label>
+            <input type="date" class="form-control" id="data_oportunidade" name="data_oportunidade" required>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="submit" class="btn btn-primary">Salvar Oportunidade</button>
+        </div>
+    </form>
+</div>
+        </div>
+    </div>
+</div>
+
 <footer class="footer mt-auto py-3">
     <div class="container text-center">
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -489,68 +532,71 @@
         <p class="text-muted mt-2 mb-0">&copy; 2025 Mundo Caramelo CRM. Todos os direitos reservados.</p>
     </div>
 </footer>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></scri
-    // --- Popula dropdown dinamicamente ---
-  document.addEventListener('DOMContentLoaded', function() {
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Popula dropdown dinamicamente ---
-// --- Popula dropdown dinamicamente ---
-async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Erro ao carregar ${url}`);
-        const data = await response.json();
+    const modalOportunidade = new bootstrap.Modal(document.getElementById('modal-oportunidade'));
+    const formOportunidade = document.getElementById('form-oportunidade');
+    const selectVendedor = document.getElementById('vendedor_id');
+    const selectCliente = document.getElementById('cliente_id');
+    
+    // Elementos do formulário do modal
+    const inputDescricaoOportunidade = document.getElementById('descricao_oportunidade');
+    const inputDataOportunidade = document.getElementById('data_oportunidade');
 
-        const dropdownButton = document.getElementById(dropdownId);
-        const dropdown = document.getElementById(dropdownId + '-menu');
 
-        if (!dropdownButton || !dropdown) {
-            console.error(`Botão ou menu com ID "${dropdownId}" não encontrado.`);
-            return;
-        }
+    // --- FUNÇÕES GERAIS E DO KANBAN ---
+    
+    // Popula dropdown dinamicamente
+    async function populateDropdown(dropdownId, url, valueKey, textKey, defaultText) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Erro ao carregar ${url}`);
+            const data = await response.json();
 
-        dropdown.innerHTML = '';
+            const dropdownButton = document.getElementById(dropdownId);
+            const dropdown = document.getElementById(dropdownId + '-menu');
 
-        if (defaultText) {
-            dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
-        }
-
-        data.forEach(item => {
-            dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
-        });
-
-        // Este listener já existe na sua função, mas está correto.
-        dropdown.addEventListener('click', function(event) {
-            const target = event.target;
-            if (target.classList.contains('dropdown-item')) {
-                // Previne a ação padrão de link
-                event.preventDefault(); 
-                dropdownButton.textContent = target.textContent;
-                dropdownButton.dataset.selectedValue = target.dataset.value;
-                applyFilters();
+            if (!dropdownButton || !dropdown) {
+                console.error(`Botão ou menu com ID "${dropdownId}" não encontrado.`);
+                return;
             }
-        });
 
-    } catch (error) {
-        console.error("Erro populando dropdown:", error);
+            dropdown.innerHTML = '';
+            if (defaultText) {
+                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="">${defaultText}</a></li>`;
+            }
+            data.forEach(item => {
+                dropdown.innerHTML += `<li><a class="dropdown-item" href="#" data-value="${item[valueKey]}">${item[textKey]}</a></li>`;
+            });
+
+            dropdown.addEventListener('click', function(event) {
+                const target = event.target;
+                if (target.classList.contains('dropdown-item')) {
+                    event.preventDefault(); 
+                    dropdownButton.textContent = target.textContent;
+                    dropdownButton.dataset.selectedValue = target.dataset.value;
+                    applyFilters();
+                }
+            });
+
+        } catch (error) {
+            console.error("Erro populando dropdown:", error);
+        }
     }
-}
-  // --- Inicializa dropdown de analistas ---
-async function initDropdowns() {
-    await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'id', 'nome_completo', 'Todos os Analistas');
-} --- Inicializa dropdown de analistas ---
-
     
-    
+    // Inicializa dropdown de analistas
+    async function initDropdowns() {
+        await populateDropdown('dropdownAnalystFilter', 'https://crm-caramelo.onrender.com/api/analistas', 'id', 'nome_completo', 'Todos os Analistas');
+    }
 
-    // --- Aplica filtros e atualiza o Kanban ---
+    // Aplica filtros e atualiza o Kanban
     async function applyFilters() {
         const analystId = document.querySelector('#dropdownAnalystFilter .dropdown-toggle')?.dataset.selectedValue || '';
         const searchTerm = document.querySelector('.toolbar input[type="text"]')?.value || '';
 
-        // Cria a query string com os filtros existentes
         const params = new URLSearchParams();
         if (analystId) {
             params.append('analyst', analystId);
@@ -572,7 +618,7 @@ async function initDropdowns() {
         }
     }
 
-    // --- Renderiza cards nas colunas ---
+    // Renderiza cards nas colunas
     function renderKanbanCards(dados) {
         const colBalada = document.getElementById('column-oportunidades-balada').querySelector('.kanban-cards');
         const colPotencial = document.getElementById('column-potencial-ganho').querySelector('.kanban-cards');
@@ -582,7 +628,6 @@ async function initDropdowns() {
         colPotencial.innerHTML = '';
         colPersonalizadas.innerHTML = '';
 
-        // Separa os dados por origem
         const kanbanData = {
             'venda': [],
             'oportunidade': []
@@ -595,7 +640,6 @@ async function initDropdowns() {
             }
         });
 
-        // Filtra e renderiza os cards para a coluna 'balada'
         const baladaCards = kanbanData['venda'].filter(item => {
             const dataEvento = new Date(item.data_evento);
             const proximoAniversario = new Date(new Date().getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
@@ -609,7 +653,6 @@ async function initDropdowns() {
             colBalada.appendChild(card);
         });
 
-        // Filtra e renderiza os cards para a coluna 'potencial de ganho'
         const potencialCards = kanbanData['venda'].filter(item => {
             const dataEvento = new Date(item.data_evento);
             const proximoAniversario = new Date(new Date().getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
@@ -624,25 +667,21 @@ async function initDropdowns() {
             colPotencial.appendChild(card);
         });
 
-        // Renderiza os cards para a coluna 'personalizadas'
         kanbanData['oportunidade'].forEach(item => {
             const card = createCardElement(item);
             colPersonalizadas.appendChild(card);
         });
 
-        // Atualiza contadores
         document.getElementById('count-oportunidades-balada').textContent = baladaCards.length;
         document.getElementById('count-potencial-ganho').textContent = potencialCards.length;
         document.getElementById('count-oportunidades-personalizadas').textContent = kanbanData['oportunidade'].length;
 
-        // Atualiza valores totais
         const totalBalada = baladaCards.reduce((sum, card) => sum + (card.total || 0), 0);
         document.getElementById('value-oportunidades-balada').textContent = `R$ ${totalBalada.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
         const totalPotencial = potencialCards.reduce((sum, card) => sum + (card.total || 0), 0);
         document.getElementById('value-potencial-ganho').textContent = `R$ ${totalPotencial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-        // Adiciona os eventos de modal novamente aos novos cards
         bindModalEvents();
     }
 
@@ -661,7 +700,7 @@ async function initDropdowns() {
 
         const origemPersonalizadaHtml = item.origem === 'oportunidade' ?
             `<p>Último Evento: ${item.ultimo_evento ?? 'N/A'}</p>
-             <div class="value-date">
+            <div class="value-date">
                 <span class="due-date">
                     <i class="far fa-calendar-alt me-1"></i> Data: ${new Date(item.data_oportunidade).toLocaleDateString('pt-BR')}
                 </span>
@@ -684,81 +723,147 @@ async function initDropdowns() {
                 ${vendedor}
             </div>
         `;
-
         return card;
     }
 
-    // --- Modal de cliente ---
-    function bindModalEvents() {
-        const cards = document.querySelectorAll('.open-client-modal');
-        const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
+    // --- FUNÇÕES DO MODAL ---
+
+    // Função para buscar os clientes na API e preencher o select
+    const carregarClientes = async (clienteSelecionadoId = null) => {
+        try {
+            const response = await fetch('https://crm-caramelo.onrender.com/api/cliente_oportunidade');
+            if (!response.ok) {
+                throw new Error('Erro ao carregar os clientes.');
+            }
+            const clientes = await response.json();
+
+            selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
+            
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.id;
+                option.textContent = cliente.nome; // Supondo que a coluna do nome do cliente é 'nome'
+                if (cliente.id == clienteSelecionadoId) {
+                    option.selected = true;
+                }
+                selectCliente.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error('Erro ao carregar clientes:', error);
+            selectCliente.innerHTML = '<option value="">Erro ao carregar</option>';
+            alert('Não foi possível carregar a lista de clientes.');
+        }
+    };
+    
+    // Função para buscar os vendedores na API e preencher o select
+    const carregarVendedores = async (vendedorSelecionadoId = null) => {
+        try {
+            const response = await fetch('https://crm-caramelo.onrender.com/api/analistas');
+            if (!response.ok) {
+                throw new Error('Erro ao carregar os vendedores.');
+            }
+            const vendedores = await response.json();
+
+            selectVendedor.innerHTML = '<option value="">Selecione um vendedor</option>';
+            
+            vendedores.forEach(vendedor => {
+                const option = document.createElement('option');
+                option.value = vendedor.id;
+                option.textContent = vendedor.nome_completo;
+                if (vendedor.id == vendedorSelecionadoId) {
+                    option.selected = true;
+                }
+                selectVendedor.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error('Erro ao carregar vendedores:', error);
+            selectVendedor.innerHTML = '<option value="">Erro ao carregar</option>';
+            alert('Não foi possível carregar a lista de vendedores.');
+        }
+    };
+    
+    // Função para abrir o modal e preencher os dados de uma venda
+    const abrirModalEdicaoOportunidade = async (vendaId) => {
+        try {
+            const response = await fetch(`https://crm-caramelo.onrender.com/api/vendas/${vendaId}`);
+            if (!response.ok) {
+                throw new Error('Venda não encontrada.');
+            }
+            const venda = await response.json();
+            
+            // Carrega e pré-seleciona os clientes e vendedores
+            await Promise.all([
+                carregarClientes(venda.cliente_id),
+                carregarVendedores(venda.vendedor_id)
+            ]);
+
+            inputDescricaoOportunidade.value = venda.notas || '';
+            inputDataOportunidade.value = venda.data_evento;
+            
+            modalOportunidade.show();
+
+        } catch (error) {
+            console.error('Erro ao abrir o modal de edição:', error);
+            alert('Não foi possível carregar os detalhes da oportunidade.');
+        }
+    };
+
+    // Altera a lógica para que os cards abram o modal de edição
+    const bindModalEvents = () => {
+        const cards = document.querySelectorAll('.kanban-card');
 
         cards.forEach(card => {
-            card.addEventListener('click', function() {
-                const clienteId = this.dataset.clienteId;
+            card.removeEventListener('click', handleCardClick);
+            card.addEventListener('click', handleCardClick);
+        });
+    };
+    
+    function handleCardClick() {
+        const vendaId = this.dataset.id.replace('opp', '');
+        abrirModalEdicaoOportunidade(vendaId);
+    }
 
-                if (clienteId) {
-                    fetch(`/cliente/${clienteId}`)
-                        .then(response => {
-                            if (!response.ok) throw new Error('Cliente não encontrado');
-                            return response.json();
-                        })
-                        .then(data => {
-                            document.getElementById('clientName').textContent = data.Nome;
-                            document.getElementById('clientEmail').textContent = data.Email;
-                            document.getElementById('clientPhone').textContent = data.Telefone;
-                            modal.show();
-                        })
-                        .catch(error => console.error('Erro ao buscar dados do cliente:', error));
-                }
-            });
+    // Ação do botão "Criar Nova Oportunidade"
+    const btnCriarOportunidade = document.getElementById('btn-criar-oportunidade');
+    if (btnCriarOportunidade) {
+        btnCriarOportunidade.addEventListener('click', () => {
+            formOportunidade.reset();
+            
+            // Carrega os clientes e vendedores ao abrir o modal de novo cadastro
+            carregarClientes();
+            carregarVendedores();
+            
+            modalOportunidade.show();
         });
     }
 
-    // --- Filtro de busca ---
-    const searchInput = document.querySelector('.toolbar input[type="text"]');
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => applyFilters(), 500);
-    });
+    // Evento de envio do formulário
+    if (formOportunidade) {
+        formOportunidade.addEventListener('submit', (event) => {
+            event.preventDefault(); 
 
-    // Inicializa dropdowns e aplica filtro inicial
-    initDropdowns().then(() => applyFilters());
-});
-
-        // CÓDIGO DO MODAL (APENAS SE ESTIVER NO MESMO BLOCO DE SCRIPT)
-        const cards = document.querySelectorAll('.open-client-modal');
-        const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
-
-        cards.forEach(card => {
-            card.addEventListener('click', function () {
-                const clienteId = this.getAttribute('data-cliente-id');
-
-                if (clienteId) {
-                    fetch(`/cliente/${clienteId}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Cliente não encontrado');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            document.getElementById('clientName').textContent = data.Nome;
-                            document.getElementById('clientEmail').textContent = data.Email;
-                            document.getElementById('clientPhone').textContent = data.Telefone;
-                            // Adicione as outras propriedades que você retornou
-                            modal.show();
-                        })
-                        .catch(error => console.error('Erro ao buscar dados do cliente:', error));
-                }
-            });
+            const dadosFormulario = {
+                cliente_id: selectCliente.value,
+                vendedor_id: selectVendedor.value,
+                descricao_oportunidade: inputDescricaoOportunidade.value,
+                data_oportunidade: inputDataOportunidade.value
+            };
+            
+            console.log('Dados a serem enviados:', dadosFormulario);
+            
+            modalOportunidade.hide();
+            alert('Dados enviados para o console. Agora, integre com o seu backend!');
         });
-
-
-</script>   
-
-
-
+    }
+    
+    // --- INICIALIZAÇÃO ---
+    // Inicia a aplicação carregando os filtros e o kanban
+    initDropdowns();
+}); // Fim do DOMContentLoaded
+</script>
 </body>
 </html>
+
+
