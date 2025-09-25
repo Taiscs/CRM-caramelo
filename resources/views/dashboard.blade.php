@@ -503,50 +503,58 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="card-section">
-                    <h4>Próximas Tarefas e Lembretes</h4>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="task-list-item">
-                                <i class="fas fa-phone-volume"></i>
-                                <div class="task-content">
-                                    <div class="task-title">Ligar para João Silva</div>
-                                    <div class="task-date">08/Jul/2025 - 10:00</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="task-list-item">
-                                <i class="fas fa-calendar-check"></i>
-                                <div class="task-content">
-                                    <div class="task-title">Reunião com Cliente ABC</div>
-                                    <div class="task-date">09/Jul/2025 - 14:30</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="task-list-item">
-                                <i class="fas fa-envelope"></i>
-                                <div class="task-content">
-                                    <div class="task-title">Enviar proposta para Maria Souza</div>
-                                    <div class="task-date">09/Jul/2025 - 16:00</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="task-list-item">
-                                <i class="fas fa-tasks"></i>
-                                <div class="task-content">
-                                    <div class="task-title">Organizar leads da Campanha Verão</div>
-                                    <div class="task-date">10/Jul/2025 - 09:00</div>
-                                </div>
-                            </div>
-                        </div>
+       <div class="col-lg-6">
+    <div class="card-section">
+        <h4>Próximas Tarefas e Lembretes</h4>
+        <div class="row">
+            
+@forelse ($aguardando_resposta as $ticket)
+    <div class="col-md-12">
+        <div class="task-list-item">
+            <i class="fas fa-envelope"></i>
+            <div class="task-content">
+                <div class="task-title">
+                    {{ $ticket['contact']['name'] ?? 'Contato sem nome' }}
+                </div>
+
+                @if(!empty($ticket['penultimaMessage']))
+                    <div class="task-title text-muted">
+                        <strong>Penúltima:</strong> "{{ $ticket['penultimaMessage'] }}"
                     </div>
+                @endif
+
+                @if(!empty($ticket['lastMessage']))
+                    <div class="task-title text-muted">
+                        <strong>Última:</strong> "{{ $ticket['lastMessage'] }}"
+                    </div>
+                @endif
+
+                <div class="task-date">
+                    {{ \Carbon\Carbon::parse($ticket['updatedAt'] ?? $ticket['createdAt'])->format('d/M/Y - H:i') }}
                 </div>
             </div>
         </div>
+    </div>
+@empty
+    <div class="col-md-12">
+        <div class="task-list-item">
+            <i class="fas fa-check-circle text-success"></i>
+            <div class="task-content">
+                <div class="task-title">Nenhuma tarefa pendente</div>
+                <div class="task-date">{{ now()->format('d/M/Y - H:i') }}</div>
+            </div>
+        </div>
+    </div>
+@endforelse
+
+        </div>
+    </div>
+</div>
+
+        </div>
+    </div>
+</div>
+
 
     </div>
     <footer class="footer mt-auto py-3">
