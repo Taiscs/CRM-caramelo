@@ -29,6 +29,7 @@ class CadastrarOportunidadeController extends Controller
         
             // 2. Encontrar o vendedor mais recente associado a um dos clientes.
             // Isso garante que apenas uma busca seja feita antes do loop.
+            // O campo 'cadastro' foi corrigido conforme a sua alteração.
             $mostRecentSale = Venda::whereIn('cliente_id', $request->input('clientes_ids'))
                                     ->orderBy('cadastro', 'desc')
                                     ->first();
@@ -60,7 +61,9 @@ class CadastrarOportunidadeController extends Controller
             ], 201);
             
         } catch (Exception $e) {
-            // Se houver qualquer erro, retorne uma resposta de erro JSON
+            // Se houver qualquer erro, retorne uma resposta de erro JSON.
+            // O erro 'SyntaxError' no frontend indica que algo no código PHP
+            // fora deste 'try...catch' está causando uma falha fatal.
             return response()->json([
                 'message' => 'Erro ao salvar oportunidades: ' . $e->getMessage(),
             ], 400);
