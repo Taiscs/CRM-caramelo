@@ -1,30 +1,44 @@
-# Usa mirror do Render para PHP 8.2 FPM (evita 401 no Docker Hub)
-FROM render-prod/docker-mirror-repository/library/php:8.2-fpm
+# ===========================
+# Stage 1: Composer + dependências
+# ===========================
+FROM composer:2.7 AS composer-stage
 
-# Instala dependências do sistema
-RUN apt-get update && apt-get install -y \
-    git curl libpng-dev libonig-dev libxml2-dev zip unzip \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+# Define diretório de trabalho
+WORKDIR /app
 
-# Instala Composer manualmente
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+# Copia apenas os arquivos do Composer para cache de dependências
+COPY composer.json composer.lock ./
+
+# Instala dependências do Laravel (sem dev e otimizado)
+RUN composer install --no-dev --optimize-autoloader
+
+# ===========================
+# Stage 2: PHP 8.2 FPM
+# ===========================
+FROM php:8.2-fpm
 
 # Define diretório de trabalho
 WORKDIR /var/www
 
-# Copia arquivos do projeto
+# Instala extensões e dependências do sistema
+RUN apt-get update && apt-get install -y \
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copia as dependências instaladas no stage anterior
+COPY --from=composer-stage /app/vendor ./vendor
+
+# Copia o restante do projeto
 COPY . .
 
-# Configura permissões de storage e bootstrap/cache
+# Cria storage e bootstrap/cache com permissões corretas
 RUN mkdir -p storage/framework/{sessions,views,cache} bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Instala dependências PHP do projeto
-RUN composer install --no-dev --optimize-autoloader
-
-# Expõe porta que o Laravel vai usar
+# Expõe a porta que o Laravel Serve vai usar
 EXPOSE 8000
 
-# Comando para rodar Laravel
+# Comando para rodar a aplicação
 CMD ["php", "artisan", "serve", "--host=0.0.0.0"]
