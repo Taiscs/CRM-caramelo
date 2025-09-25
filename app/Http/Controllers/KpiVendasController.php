@@ -36,7 +36,7 @@ class KpiVendasController extends Controller
             // Use asset() para garantir URL correta
             $photoUrl = $consultor->foto && file_exists(public_path($consultor->foto))
                 ? asset($consultor->foto)
-                : asset('storage/fotos_vendedores/default-avatar.png');
+                : asset('assets/default-avatar.png');
 
             return [
                 'id' => $consultor->id,
