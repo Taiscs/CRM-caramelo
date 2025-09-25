@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Contato;
+use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
     public function handle(Request $request)
     {
         $data = $request->all();
+
+        // 🔎 Loga o que chegou no Laravel (aparece em storage/logs/laravel.log)
+        Log::info('Webhook recebido:', $data);
 
         // Verifica se existe o contato
         $contactData = $data['contact'] ?? null;
