@@ -46,7 +46,7 @@ class VendedorController extends Controller
 
         if ($request->hasFile('foto')) {
             // Deleta a foto antiga se ela existir e for diferente do padrão
-            if ($consultor->foto && strpos($consultor->foto, 'default-avatar.png') === false) {
+            if ($consultor->foto && strpos($consultor->foto, 'assets/default-avatar.png') === false) {
                 $caminhoAntigo = public_path($consultor->foto);
                 if (file_exists($caminhoAntigo)) {
                     unlink($caminhoAntigo);
