@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 
-# Instala Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Instala Composer (versão fixa)
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # Define diretório de trabalho
 WORKDIR /var/www
@@ -19,8 +19,6 @@ COPY . .
 RUN mkdir -p storage/framework/{sessions,views,cache} bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
-   
-
 
 # Instala dependências do PHP via Composer
 RUN composer install --no-dev --optimize-autoloader
