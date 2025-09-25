@@ -528,6 +528,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const modalOportunidade = new bootstrap.Modal(document.getElementById('modal-oportunidade'));
@@ -859,23 +861,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Criar um array de oportunidades para envio em lote
-            const oportunidadesParaEnviar = clientesAdicionados.map(cliente => {
-                return {
-                    cliente_id: cliente.id,
-                    descricao_oportunidade: inputDescricaoOportunidade.value,
-                    data_oportunidade: inputDataOportunidade.value
-                };
-            });
+            // Criar um objeto para envio com um array de IDs
+            const clientesIdsParaEnviar = clientesAdicionados.map(cliente => cliente.id);
+            
+            const dadosOportunidade = {
+                clientes_ids: clientesIdsParaEnviar,
+                descricao_oportunidade: inputDescricaoOportunidade.value,
+                data_oportunidade: inputDataOportunidade.value
+            };
             
             // Integração com o backend
+            // ESTA É A REQUISIÇÃO DE ENVIO DO FORMULÁRIO QUE USA O MÉTODO POST.
             try {
                 const response = await fetch('https://crm-caramelo.onrender.com/api/oportunidades', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(oportunidadesParaEnviar),
+                    body: JSON.stringify(dadosOportunidade),
                 });
 
                 const result = await response.json();
