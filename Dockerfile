@@ -1,5 +1,5 @@
-# Usa PHP 8.2 FPM oficial
-FROM php:8.2-fpm
+# Usa mirror do Render para PHP 8.2 FPM (evita 401 no Docker Hub)
+FROM render-prod/docker-mirror-repository/library/php:8.2-fpm
 
 # Instala dependências do sistema
 RUN apt-get update && apt-get install -y \
@@ -15,18 +15,16 @@ WORKDIR /var/www
 # Copia arquivos do projeto
 COPY . .
 
-# Permissões de storage e cache
+# Configura permissões de storage e bootstrap/cache
 RUN mkdir -p storage/framework/{sessions,views,cache} bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Instala dependências do projeto
+# Instala dependências PHP do projeto
 RUN composer install --no-dev --optimize-autoloader
 
-# Expõe porta
+# Expõe porta que o Laravel vai usar
 EXPOSE 8000
 
-# Comando para rodar o Laravel
+# Comando para rodar Laravel
 CMD ["php", "artisan", "serve", "--host=0.0.0.0"]
-
-
