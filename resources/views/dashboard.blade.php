@@ -503,57 +503,23 @@
                     </div>
                 </div>
             </div>
-       <div class="col-lg-6">
+           <div class="col-lg-6">
     <div class="card-section">
-        <h4>Próximas Tarefas e Lembretes</h4>
-        <div class="row">
+<div class="tickets-container">
+    @foreach ($aguardandoTickets as $ticket)
+        <div class="ticket-card border p-4 rounded mb-3 shadow-sm">
+            <h3>{{ $ticket['contact']['name'] ?? 'Sem Nome' }}</h3>
+            <p>Status: {{ $ticket['status'] ?? 'N/A' }} | LeadStatus: {{ $ticket['leadstatus']['queue'] ?? 'Sem Status' }}</p>
             
-@forelse ($aguardando_resposta as $ticket)
-    <div class="col-md-12">
-        <div class="task-list-item">
-            <i class="fas fa-envelope"></i>
-            <div class="task-content">
-                <div class="task-title">
-                    {{ $ticket['contact']['name'] ?? 'Contato sem nome' }}
-                </div>
+            <p><strong>Última mensagem do lead:</strong> {{ $ticket['lastMessageFromLead'] ?? 'Sem mensagem' }}</p>
+            <p><strong>Penúltima mensagem do lead:</strong> {{ $ticket['secondLastMessageFromLead'] ?? 'Sem mensagem' }}</p>
 
-                @if(!empty($ticket['penultimaMessage']))
-                    <div class="task-title text-muted">
-                        <strong>Penúltima:</strong> "{{ $ticket['penultimaMessage'] }}"
-                    </div>
-                @endif
-
-                @if(!empty($ticket['lastMessage']))
-                    <div class="task-title text-muted">
-                        <strong>Última:</strong> "{{ $ticket['lastMessage'] }}"
-                    </div>
-                @endif
-
-                <div class="task-date">
-                    {{ \Carbon\Carbon::parse($ticket['updatedAt'] ?? $ticket['createdAt'])->format('d/M/Y - H:i') }}
-                </div>
-            </div>
+            <p>Total de mensagens não lidas: {{ $ticket['unreadMessages'] ?? 0 }}</p>
+            <p>Aguardando resposta: Sim</p>
         </div>
-    </div>
-@empty
-    <div class="col-md-12">
-        <div class="task-list-item">
-            <i class="fas fa-check-circle text-success"></i>
-            <div class="task-content">
-                <div class="task-title">Nenhuma tarefa pendente</div>
-                <div class="task-date">{{ now()->format('d/M/Y - H:i') }}</div>
-            </div>
-        </div>
-    </div>
-@endforelse
-
-        </div>
-    </div>
+    @endforeach
 </div>
 
-        </div>
-    </div>
-</div>
 
 
     </div>
@@ -770,6 +736,10 @@ document.addEventListener('DOMContentLoaded', fetchLeadsData);
             }
         }
     });
+
+
+
+
     </script>
 </body>
 </html>
