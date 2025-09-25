@@ -16,6 +16,7 @@ use App\Http\Controllers\KpiVendasController;
 use App\Http\Controllers\UnidadeController;
 use App\Http\Controllers\OportunidadeController;
 use App\Http\Controllers\ClienteOportunidadeController;
+use App\Http\Controllers\CadastrarOportunidadeController;
 use App\Http\Controllers\WebhookController;
 
 
