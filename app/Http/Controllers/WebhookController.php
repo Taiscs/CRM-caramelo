@@ -12,26 +12,20 @@ class WebhookController extends Controller
     {
         $data = $request->all();
 
-        // 🔎 Loga o que chegou no Laravel (aparece em storage/logs/laravel.log)
+        // 🔎 Logar todo o payload que chegou
         Log::info('Webhook recebido:', $data);
 
-        // Verifica se existe o contato
-        $contactData = $data['contact'] ?? null;
-        if (!$contactData) {
-            return response()->json(['error' => 'Contato não encontrado'], 400);
-        }
-
-        // Cria ou atualiza o contato
+        // Agora os dados já estão na raiz
         $contato = Contato::updateOrCreate(
-            ['id_externo' => $contactData['id'] ?? null],
+            ['id_externo' => $data['id'] ?? null],
             [
-                'nome' => $contactData['name'] ?? null,
-                'numero' => $contactData['number'] ?? null,
-                'email' => $contactData['email'] ?? null,
-                'pushname' => $contactData['pushname'] ?? null,
-                'observacoes' => $contactData['observations'] ?? null,
-                'campos_personalizados' => isset($contactData['customFields']) 
-                    ? json_encode($contactData['customFields']) 
+                'nome' => $data['name'] ?? null,
+                'numero' => $data['number'] ?? null,
+                'email' => $data['email'] ?? null,
+                'pushname' => $data['pushname'] ?? null,
+                'observacoes' => $data['observations'] ?? null,
+                'campos_personalizados' => isset($data['customFields'])
+                    ? json_encode($data['customFields'])
                     : null,
             ]
         );
