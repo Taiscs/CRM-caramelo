@@ -17,19 +17,15 @@ class DashboardController extends Controller
         // Dados internos do sistema
         // ---------------------------
 
-        // Total de clientes
         $total_clientes = Cliente::count();
 
-        // Novos leads nos últimos 30 dias
         $novos_leads = Contato::where('created_at', '>=', Carbon::now()->subDays(30))->count();
 
-        // Taxa de conversão
         $taxa_conversao = $novos_leads > 0 
             ? ($total_clientes / $novos_leads) * 100 
             : 0;
         $taxa_conversao_formatada = number_format($taxa_conversao, 2, ',', '.') . '%';
 
-        // Vendas fechadas do mês atual (excluindo canceladas)
         $vendas_fechadas_valor = Venda::whereMonth('cadastro', Carbon::now()->month)
                                       ->whereYear('cadastro', Carbon::now()->year)
                                       ->where('situacao', '<>', 'Cancelado')
@@ -43,47 +39,74 @@ class DashboardController extends Controller
         $total_conversas = 0;
         $total_aguardando_resposta = 0;
         $total_unread_messages = 0;
-        $leadStatusCounts = []; // para gráfico de funil
+        $leadStatusCounts = [];
+        $aguardando_resposta = collect();
 
-        $data = $jetsales->get('tickets', [
-            'searchParam' => '',
-            'showAll' => false,
-            'withUnreadMessages' => false,
-            'isNotAssignedUser' => false,
-            'includeNotQueueDefined' => true,
-            'isChatBot' => false,
-            'pageNumber' => 1,
-            'status' => 'open'
-        ]);
+        try {
+            $data = $jetsales->get('tickets', [
+                'searchParam' => '',
+                'showAll' => false,
+                'withUnreadMessages' => false,
+                'isNotAssignedUser' => false,
+                'includeNotQueueDefined' => true,
+                'isChatBot' => false,
+                'pageNumber' => 1,
+                'status' => 'open'
+            ]);
 
-        if (!empty($data)) {
-            $total_conversas = (int) ($data['count'] ?? 0);
+            if (!empty($data)) {
+                $total_conversas = (int) ($data['count'] ?? 0);
 
-            if (!empty($data['tickets'])) {
-                $tickets = collect($data['tickets']);
+                if (!empty($data['tickets'])) {
+                    $tickets = collect($data['tickets']);
 
-                // Tickets aguardando resposta
-                $total_aguardando_resposta = $tickets
-                    ->filter(function($ticket) {
-                        $answered = is_bool($ticket['answered']) 
-                            ? $ticket['answered'] 
-                            : filter_var($ticket['answered'], FILTER_VALIDATE_BOOLEAN);
-                        return $ticket['status'] === 'open' && !$answered;
-                    })
-                    ->count();
+                    // Tickets aguardando resposta (lista + última/penúltima msg)
+                    $aguardando_resposta = $tickets->filter(function($ticket) {
+                            $answered = is_bool($ticket['answered']) 
+                                ? $ticket['answered'] 
+                                : filter_var($ticket['answered'], FILTER_VALIDATE_BOOLEAN);
 
-                // Total de mensagens não lidas
-                $total_unread_messages = $tickets->sum('unreadMessages');
+                            return $ticket['status'] === 'open' && !$answered;
+                        })
+                        ->map(function($ticket) {
+                            // Última mensagem
+                            $lastMessage = $ticket['lastMessage'] ?? null;
 
-                // Contagem por leadstatus
-                foreach ($tickets as $ticket) {
-                    $statusName = $ticket['leadstatus']['queue'] ?? 'Sem Status';
-                    if (!isset($leadStatusCounts[$statusName])) {
-                        $leadStatusCounts[$statusName] = 0;
+                            // Penúltima mensagem (se houver histórico)
+                            $messages = $ticket['messages'] ?? [];
+                            $penultima = null;
+                            if (is_array($messages) && count($messages) > 1) {
+                                $penultima = $messages[count($messages) - 2]['body'] ?? null;
+                            }
+
+                            return [
+                                'id' => $ticket['id'],
+                                'contact' => $ticket['contact'],
+                                'createdAt' => $ticket['createdAt'],
+                                'updatedAt' => $ticket['updatedAt'] ?? null,
+                                'lastMessage' => $lastMessage,
+                                'penultimaMessage' => $penultima,
+                            ];
+                        })
+                        ->values();
+
+                    $total_aguardando_resposta = $aguardando_resposta->count();
+
+                    // Total de mensagens não lidas
+                    $total_unread_messages = $tickets->sum('unreadMessages');
+
+                    // Contagem por leadstatus
+                    foreach ($tickets as $ticket) {
+                        $statusName = $ticket['leadstatus']['queue'] ?? 'Sem Status';
+                        if (!isset($leadStatusCounts[$statusName])) {
+                            $leadStatusCounts[$statusName] = 0;
+                        }
+                        $leadStatusCounts[$statusName]++;
                     }
-                    $leadStatusCounts[$statusName]++;
                 }
             }
+        } catch (\Exception $e) {
+            \Log::error("Erro Jetsales API: " . $e->getMessage());
         }
 
         // ---------------------------
@@ -97,7 +120,8 @@ class DashboardController extends Controller
             'total_conversas',
             'total_aguardando_resposta',
             'total_unread_messages',
-            'leadStatusCounts' // gráfico de funil
+            'leadStatusCounts',
+            'aguardando_resposta'
         ));
     }
 }
