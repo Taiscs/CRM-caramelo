@@ -57,6 +57,7 @@ Route::get('/meses-vendas', [GraficosController::class, 'mesesDisponiveis']);
 Route::get('/anos-vendas', [RelatorioController::class, 'anosVendas']);
 Route::get('oportunidades-filtradas', [OportunidadeController::class, 'oportunidadesFiltradas']);
 Route::get('/cliente_oportunidade', [ClienteOportunidadeController::class, 'index']);
+Route::post('/oportunidades', [CadastrarOportunidadeController::class, 'createOpportunity']);
 Route::post('/webhook/jetsales', [WebhookController::class, 'handle']);
 
 
