@@ -20,7 +20,6 @@ use App\Http\Controllers\CadastrarOportunidadeController;
 use App\Http\Controllers\WebhookController;
 
 
-
 // Rotas de KPIs e relatórios
 Route::get('/relatorios/kpis', [RelatorioController::class, 'kpis']);
 Route::get('/relatorios/kpis/vendedor', [VendedorController::class, 'kpiVendedor']);
@@ -60,13 +59,3 @@ Route::get('oportunidades-filtradas', [OportunidadeController::class, 'oportunid
 Route::get('/cliente_oportunidade', [ClienteOportunidadeController::class, 'index']);
 Route::post('/oportunidades', [CadastrarOportunidadeController::class, 'createOpportunity']);
 Route::post('/webhook/jetsales', [WebhookController::class, 'handle']);
-
-
-
-
-
-
-
-
-
-
