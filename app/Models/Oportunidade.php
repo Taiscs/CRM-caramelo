@@ -16,6 +16,12 @@ class Oportunidade extends Model
     protected $table = 'oportunidades';
     
     /**
+     * Define que o modelo não usará colunas de timestamp (created_at e updated_at).
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * Define os campos que podem ser preenchidos em massa.
      * @var array<int, string>
      */
