@@ -15,6 +15,7 @@ use App\Http\Controllers\HistoricoComprasController;
 use App\Http\Controllers\KpiVendasController;
 use App\Http\Controllers\UnidadeController;
 use App\Http\Controllers\OportunidadeController;
+use App\Http\Controllers\ClienteOportunidadeController;
 use App\Http\Controllers\WebhookController;
 
 
@@ -55,6 +56,7 @@ Route::get('/filtros/situacoes', [GraficosController::class, 'situacoesDisponive
 Route::get('/meses-vendas', [GraficosController::class, 'mesesDisponiveis']);
 Route::get('/anos-vendas', [RelatorioController::class, 'anosVendas']);
 Route::get('oportunidades-filtradas', [OportunidadeController::class, 'oportunidadesFiltradas']);
+Route::get('/cliente_oportunidade', [ClienteOportunidadeController::class, 'index']);
 Route::post('/webhook/jetsales', [WebhookController::class, 'handle']);
 
 
