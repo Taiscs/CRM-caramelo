@@ -30,7 +30,7 @@ class CadastrarOportunidadeController extends Controller
             // 2. Encontrar o vendedor mais recente associado a um dos clientes.
             // Isso garante que apenas uma busca seja feita antes do loop.
             $mostRecentSale = Venda::whereIn('cliente_id', $request->input('clientes_ids'))
-                                    ->orderBy('data_venda', 'desc')
+                                    ->orderBy('cadastro', 'desc')
                                     ->first();
         
             $vendedorId = null;
