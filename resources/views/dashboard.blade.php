@@ -504,21 +504,18 @@
                 </div>
             </div>
            <div class="col-lg-6">
-    <div class="card-section">
 <div class="tickets-container">
     @foreach ($aguardandoTickets as $ticket)
         <div class="ticket-card border p-4 rounded mb-3 shadow-sm">
             <h3>{{ $ticket['contact']['name'] ?? 'Sem Nome' }}</h3>
             <p>Status: {{ $ticket['status'] ?? 'N/A' }} | LeadStatus: {{ $ticket['leadstatus']['queue'] ?? 'Sem Status' }}</p>
-            
             <p><strong>Última mensagem do lead:</strong> {{ $ticket['lastMessageFromLead'] ?? 'Sem mensagem' }}</p>
-            <p><strong>Penúltima mensagem do lead:</strong> {{ $ticket['secondLastMessageFromLead'] ?? 'Sem mensagem' }}</p>
-
             <p>Total de mensagens não lidas: {{ $ticket['unreadMessages'] ?? 0 }}</p>
             <p>Aguardando resposta: Sim</p>
         </div>
     @endforeach
 </div>
+
 
 
 
@@ -744,4 +741,3 @@ document.addEventListener('DOMContentLoaded', fetchLeadsData);
 </body>
 </html>
   
-

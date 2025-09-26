@@ -349,126 +349,54 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6 col-lg-4">
-            <div class="campaign-card" data-bs-toggle="modal" data-bs-target="#campaignModal" data-campaign-id="camp1" data-mode="view">
-                <div class="campaign-header">
-                    <div>
-                        <h5>Boas-Vindas (Novos Leads)</h5>
-                        <div class="campaign-type"><i class="fas fa-envelope"></i> E-mail Marketing</div>
-                    </div>
-                    <span class="status-badge active">Ativa</span>
-                </div>
-                <p class="text-muted small">De 01/Jul/2025 a 31/Dez/2025</p>
-                <div class="metrics">
-                    <div class="metric-item">
-                        <div class="value pink">1.250</div>
-                        <div class="label">Leads Alcançados</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="value">45.2%</div>
-                        <div class="label">Tx. Abertura</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="value">12.8%</div>
-                        <div class="label">Tx. Cliques</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="value green">50</div>
-                        <div class="label">Conversões</div>
-                    </div>
-                </div>
-                <div class="analyst-info">
-                    <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Ana Paula">
-                    Graça Dias
-                </div>
-            </div>
-        </div>
+    
 
-        <div class="col-md-6 col-lg-4">
-            <div class="campaign-card" data-bs-toggle="modal" data-bs-target="#campaignModal" data-campaign-id="camp2" data-mode="view">
-                <div class="campaign-header">
-                    <div>
-                        <h5>Promoção Relâmpago (Julho)</h5>
-                        <div class="campaign-type"><i class="fas fa-sms"></i> SMS</div>
-                    </div>
-                    <span class="status-badge paused">Pausada</span>
-                </div>
-                <p class="text-muted small">De 10/Jul/2025 a 15/Jul/2025</p>
-                <div class="metrics">
-                    <div class="metric-item">
-                        <div class="value pink">800</div>
-                        <div class="label">Envios</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="value">8.5%</div>
-                        <div class="label">Cliques no Link</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="value green">15</div>
-                        <div class="label">Vendas</div>
-                    </div>
-                </div>
-                <div class="analyst-info">
-                    <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Laiz">
-                    Laiz
-                </div>
-            </div>
-        </div>
+   
+<div class="row">
+    @forelse($campaigns as $campaign)
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="campaign-card" data-bs-toggle="modal"
+                 data-bs-target="#campaignModal"
+                 data-campaign-id="{{ $campaign['id'] ?? '' }}"
+                 data-mode="view">
 
-        <div class="col-md-6 col-lg-4">
-            <div class="campaign-card" data-bs-toggle="modal" data-bs-target="#campaignModal" data-campaign-id="camp3" data-mode="view">
+                <!-- Cabeçalho da Campanha -->
                 <div class="campaign-header">
                     <div>
-                        <h5>Lançamento Novo Pacote Festa Teen</h5>
-                        <div class="campaign-type"><i class="fas fa-lightbulb"></i> Rascunho</div>
+                        <h5>{{ $campaign['name'] ?? 'Sem Nome' }}</h5>
+                        <div class="campaign-type">
+                            <i class="fas fa-bullhorn"></i>
+                            Campanha
+                        </div>
                     </div>
-                    <span class="status-badge draft">Rascunho</span>
+                    <span class="status-badge {{ strtolower($campaign['status'] ?? '') }}">
+                        {{ ucfirst($campaign['status'] ?? 'Desconhecido') }}
+                    </span>
                 </div>
-                <p class="text-muted small">Ainda não definida</p>
-                <div class="metrics">
-                    <div class="metric-item">
-                        <div class="value">0</div>
-                        <div class="label">Leads Gerados</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="value">0%</div>
-                        <div class="label">Tx. Conversão</div>
-                    </div>
-                </div>
-                <div class="analyst-info">
-                    <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Yasminie">
-                    Yasminie
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="campaign-card" data-bs-toggle="modal" data-bs-target="#campaignModal" data-campaign-id="camp4" data-mode="view">
-                <div class="campaign-header">
-                    <div>
-                        <h5>Mundo Caramelo</h5>
-                        <div class="campaign-type"><i class="fas fa-desktop"></i> Evento Online</div>
-                    </div>
-                    <span class="status-badge finished">Finalizada</span>
-                </div>
-                <p class="text-muted small">De 15/Mai/2025 a 15/Mai/2025</p>
+                <!-- Métricas -->
                 <div class="metrics">
                     <div class="metric-item">
-                        <div class="value pink">250</div>
-                        <div class="label">Participantes</div>
+                        <div class="value pink">{{ $campaign['contactsCount'] ?? 0 }}</div>
+                        <div class="label">Contatos que receberam</div>
                     </div>
                     <div class="metric-item">
-                        <div class="value green">10</div>
-                        <div class="label">Novos Clientes</div>
+                        <div class="value">{{ $campaign['lidas'] ?? '0%' }}</div>
+                        <div class="label">Contatos que Visualizaram</div>
                     </div>
-                </div>
-                <div class="analyst-info">
-                    <img src="https://media.licdn.com/dms/image/v2/D4D03AQHUKiuia01m4g/profile-displayphoto-shrink_100_100/B4DZO8dH4QGgAY-/0/1734033575553?e=2147483647&v=beta&t=A4hj8F4hA4PL90JQcwKPqtVrY_YifF8uUIhhTeAwgfE" alt="Larissa">
-                    Larissa
+                    <div class="metric-item">
+                        <div class="value green">{{ $campaign['userId'] ?? '-' }}</div>
+                        <div class="label">Responsável (ID Usuário)</div>
+                    </div>
                 </div>
             </div>
         </div>
+    @empty
+        <p class="text-muted">Nenhuma campanha encontrada.</p>
+    @endforelse
+</div>
+
+
 
     </div>
 </div>
