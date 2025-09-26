@@ -51,7 +51,7 @@ class DashboardController extends Controller
                 'includeNotQueueDefined' => true,
                 'isChatBot' => false,
                 'pageNumber' => 1,
-                'status' => 'open'
+                'status' => 'open' // pega TODOS os tickets abertos
             ]);
 
             if (!empty($data)) {
@@ -60,11 +60,12 @@ class DashboardController extends Controller
                 if (!empty($data['tickets'])) {
                     $tickets = collect($data['tickets']);
 
-                    // Filtra apenas tickets que estão aguardando resposta
-                    $aguardandoTickets = $tickets->filter(function($ticket) {
+                    // Filtra apenas tickets aguardando resposta
+                    $aguardandoTickets = $tickets->filter(function ($ticket) {
                         $answered = is_bool($ticket['answered'])
                             ? $ticket['answered']
                             : filter_var($ticket['answered'], FILTER_VALIDATE_BOOLEAN);
+
                         return $ticket['status'] === 'open' && !$answered;
                     })->values();
 
@@ -73,40 +74,40 @@ class DashboardController extends Controller
                     // Total de mensagens não lidas
                     $total_unread_messages = $tickets->sum('unreadMessages');
 
-                    // Contagem por leadstatus e busca últimas mensagens do lead
+                    // Contagem por status + últimas mensagens do lead
                     foreach ($aguardandoTickets as &$ticket) {
-    $statusName = $ticket['leadstatus']['queue'] ?? 'Sem Status';
-    if (!isset($leadStatusCounts[$statusName])) {
-        $leadStatusCounts[$statusName] = 0;
-    }
-    $leadStatusCounts[$statusName]++;
+                        $statusName = $ticket['leadstatus']['queue'] ?? 'Sem Status';
+                        $leadStatusCounts[$statusName] = ($leadStatusCounts[$statusName] ?? 0) + 1;
 
-    // --------- BUSCA ÚLTIMA E PENÚLTIMA MENSAGEM DO LEAD ---------
-    try {
-        $messages = $jetsales->get("tickets/{$ticket['id']}/messages");
+                        try {
+                            $response = $jetsales->get("tickets/{$ticket['id']}/messages");
 
-        if (!is_array($messages) || empty($messages)) {
-            $ticket['lastMessageFromLead'] = null;
-            $ticket['secondLastMessageFromLead'] = null;
-        } else {
-            // Filtra apenas mensagens do lead, independentemente de lidas
-            $leadMessages = array_filter($messages, function($msg) {
-                return isset($msg['author_type']) && $msg['author_type'] === 'lead';
-            });
+                            // Ajuste caso a API retorne as mensagens em outra chave
+                            $messagesArray = $response['messages'] ?? $response['data'] ?? [];
 
-            $leadMessages = array_values($leadMessages); // reindexa
+                            // Filtra mensagens do lead
+                            $leadMessages = array_values(array_filter($messagesArray, function ($msg) {
+                                return isset($msg['author_type']) && $msg['author_type'] === 'lead';
+                            }));
 
-            $lastTwo = array_slice($leadMessages, -2);
+                            $lastTwo = array_slice($leadMessages, -2);
 
-            $ticket['lastMessageFromLead'] = end($lastTwo)['text'] ?? null;
-            $ticket['secondLastMessageFromLead'] = count($lastTwo) === 2 ? $lastTwo[0]['text'] : null;
-        }
-    } catch (\Exception $e) {
-        $ticket['lastMessageFromLead'] = null;
-        $ticket['secondLastMessageFromLead'] = null;
-    }
-}
+                            if (count($lastTwo) === 0) {
+                                $ticket['lastMessageFromLead'] = null;
+                                $ticket['secondLastMessageFromLead'] = null;
+                            } elseif (count($lastTwo) === 1) {
+                                $ticket['lastMessageFromLead'] = $lastTwo[0]['text'] ?? null;
+                                $ticket['secondLastMessageFromLead'] = null;
+                            } else {
+                                $ticket['lastMessageFromLead'] = $lastTwo[1]['text'] ?? null;
+                                $ticket['secondLastMessageFromLead'] = $lastTwo[0]['text'] ?? null;
+                            }
 
+                        } catch (\Exception $e) {
+                            $ticket['lastMessageFromLead'] = null;
+                            $ticket['secondLastMessageFromLead'] = null;
+                        }
+                    }
                 }
             }
         } catch (\Exception $e) {
