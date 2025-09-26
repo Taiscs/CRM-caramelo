@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Oportunidade;
 use App\Models\Venda;
 use Exception;
+use Illuminate\Support\Facades\Log; // Importe a classe Log aqui
 
 class CadastrarOportunidadeController extends Controller
 {
@@ -28,8 +29,6 @@ class CadastrarOportunidadeController extends Controller
             ]);
         
             // 2. Encontrar o vendedor mais recente associado a um dos clientes.
-            // Isso garante que apenas uma busca seja feita antes do loop.
-            // O campo 'cadastro' foi corrigido conforme a sua alteração.
             $mostRecentSale = Venda::whereIn('cliente_id', $request->input('clientes_ids'))
                                     ->orderBy('cadastro', 'desc')
                                     ->first();
@@ -38,16 +37,13 @@ class CadastrarOportunidadeController extends Controller
             if ($mostRecentSale) {
                 $vendedorId = $mostRecentSale->vendedor_id;
             } else {
-                // Se nenhum registro de venda for encontrado, defina um vendedor padrão.
-                // Altere o valor '1' para o ID do vendedor padrão desejado.
+                // Caso não encontre, atribui um ID padrão.
                 $vendedorId = 1;
             }
         
             // 3. Salvar uma nova oportunidade para CADA cliente da lista
             foreach ($request->input('clientes_ids') as $clienteId) {
-                // Importante: Verifique se os campos 'vendedor_id', 'cliente_id', 
-                // 'descricao_oportunidade' e 'data_oportunidade' estão no array 
-                // $fillable do seu modelo Oportunidade.php.
+                // Verifique se os campos estão em seu modelo 'Oportunidade.php'.
                 Oportunidade::create([
                     'vendedor_id' => $vendedorId,
                     'cliente_id' => $clienteId,
@@ -61,9 +57,12 @@ class CadastrarOportunidadeController extends Controller
             ], 201);
             
         } catch (Exception $e) {
-            // Se houver qualquer erro, retorne uma resposta de erro JSON.
-            // O erro 'SyntaxError' no frontend indica que algo no código PHP
-            // fora deste 'try...catch' está causando uma falha fatal.
+            // Esta linha irá registrar o erro detalhado no seu arquivo de log do Laravel.
+            Log::error('Erro ao salvar oportunidades: ' . $e->getMessage(), [
+                'stack_trace' => $e->getTraceAsString(),
+                'request_body' => $request->all()
+            ]);
+            
             return response()->json([
                 'message' => 'Erro ao salvar oportunidades: ' . $e->getMessage(),
             ], 400);

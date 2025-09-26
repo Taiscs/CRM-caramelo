@@ -74,39 +74,13 @@ class DashboardController extends Controller
                     // Total de mensagens não lidas
                     $total_unread_messages = $tickets->sum('unreadMessages');
 
-                    // Contagem por status + últimas mensagens do lead
+                    // Contagem por status + última mensagem do lead
                     foreach ($aguardandoTickets as &$ticket) {
                         $statusName = $ticket['leadstatus']['queue'] ?? 'Sem Status';
                         $leadStatusCounts[$statusName] = ($leadStatusCounts[$statusName] ?? 0) + 1;
 
-                        try {
-                            $response = $jetsales->get("tickets/{$ticket['id']}/messages");
-
-                            // Ajuste caso a API retorne as mensagens em outra chave
-                            $messagesArray = $response['messages'] ?? $response['data'] ?? [];
-
-                            // Filtra mensagens do lead
-                            $leadMessages = array_values(array_filter($messagesArray, function ($msg) {
-                                return isset($msg['author_type']) && $msg['author_type'] === 'lead';
-                            }));
-
-                            $lastTwo = array_slice($leadMessages, -2);
-
-                            if (count($lastTwo) === 0) {
-                                $ticket['lastMessageFromLead'] = null;
-                                $ticket['secondLastMessageFromLead'] = null;
-                            } elseif (count($lastTwo) === 1) {
-                                $ticket['lastMessageFromLead'] = $lastTwo[0]['text'] ?? null;
-                                $ticket['secondLastMessageFromLead'] = null;
-                            } else {
-                                $ticket['lastMessageFromLead'] = $lastTwo[1]['text'] ?? null;
-                                $ticket['secondLastMessageFromLead'] = $lastTwo[0]['text'] ?? null;
-                            }
-
-                        } catch (\Exception $e) {
-                            $ticket['lastMessageFromLead'] = null;
-                            $ticket['secondLastMessageFromLead'] = null;
-                        }
+                        // Pega diretamente a última mensagem do lead
+                        $ticket['lastMessageFromLead'] = $ticket['lastMessage'] ?? 'Sem mensagem';
                     }
                 }
             }
