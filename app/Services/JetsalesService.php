@@ -77,6 +77,14 @@ class JetsalesService
             $response = Http::withToken($token)->get("{$this->baseUrl}/{$endpoint}", $params);
         }
 
-        return $response->successful() ? $response->json() : null;
+        return 
+        $response->successful() ? $response->json() : null;
     }
+
+    public function getCampaigns(array $params = []): ?array
+{
+    // Busca todas as campanhas da API
+    return $this->get('campaigns', $params);
+}
+
 }
