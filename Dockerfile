@@ -26,7 +26,6 @@ RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} \
 # Define porta
 EXPOSE 8000
 
-# Comando inicial do container
-CMD sh -c "php artisan serve --host=0.0.0.0 --port=$PORT"
+
 
 
