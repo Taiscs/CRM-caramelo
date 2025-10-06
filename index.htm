@@ -1,0 +1,60 @@
+<!-- index.html (trecho) -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Meu Chat</title>
+  <!-- Troque a importação de fonte aqui (remova qualquer font proprietária) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0f1724;         /* mude as cores */
+      --surface: #0b1220;
+      --accent: #0066cc;     /* escolha sua cor */
+      --text: #e6eef8;
+      --radius: 12px;
+    }
+    body{
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #071021);
+      color: var(--text);
+      margin:0;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:16px;
+      background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .logo{
+      width:36px;
+      height:36px;
+      border-radius:8px;
+      background:var(--accent); /* seu bloco de logo */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      color:white;
+      font-size:14px;
+    }
+    .title{ font-weight:600; font-size:16px; }
+    /* demais estilos do chat: mude espaçamentos, bordas, etc. */
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">TC</div>
+    <div class="title">Meu Chat — TI & Projetos</div>
+  </header>
+
+  <!-- resto do layout do chat -->
+  <main style="padding:20px;">
+    <p>Conteúdo do chat aqui — layout alterado e sem referências à Render.</p>
+  </main>
+</body>
+</html>
